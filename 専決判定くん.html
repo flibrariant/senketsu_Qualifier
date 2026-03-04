@@ -399,12 +399,15 @@ function switchTab(tab, btn) {
 // ===== 専決者データ（6段階） =====
 // bar: ランクバー点灯数（1〜6）
 const RANKS = {
-  senninkacho: { name: '専任課長等',   css: 'rank-sennin', pip: 'p-sennin', bar: 1, emoji: '📋', msg: 'ルーティン案件！専任課長等が颯爽とはんこを押す！'       },
-  kacho:       { name: '課長等',       css: 'rank-kacho',  pip: 'p-kacho',  bar: 2, emoji: '✅', msg: '定例業務！課長等がテキパキ処理します！'                  },
-  jicho:       { name: '部等の次長等', css: 'rank-jicho',  pip: 'p-jicho',  bar: 3, emoji: '📂', msg: 'ちょっと大きめ！次長等クラスの案件です！'                },
-  bucho:       { name: '部長等',       css: 'rank-bucho',  pip: 'p-bucho',  bar: 4, emoji: '🔑', msg: 'かなりの大型案件！部長等の出番！'                       },
-  fuku:        { name: '副市長',       css: 'rank-fuku',   pip: 'p-fuku',   bar: 5, emoji: '👑', msg: '大型！副市長マター！市全体を揺るがすスケール！'           },
-  shicho:      { name: '市　長',       css: 'rank-shicho', pip: 'p-shicho', bar: 6, emoji: '🏛️', msg: '超大型案件！これは市長決裁！！市が動く！！！' },
+  senninkacho:   { name: '専任課長等',           css: 'rank-sennin', pip: 'p-sennin', bar: 1, emoji: '📋', msg: 'ルーティン案件！専任課長等が颯爽とはんこを押す！'       },
+  kacho:         { name: '課長等',               css: 'rank-kacho',  pip: 'p-kacho',  bar: 2, emoji: '✅', msg: '定例業務！課長等がテキパキ処理します！'                },
+  jinjichoOnly:  { name: '人事課長のみ',         css: 'rank-kacho',  pip: 'p-kacho',  bar: 2, emoji: '📋', msg: '人事課長の専決案件！人事課長のみがはんこを押す！'      },
+  kaikakachoOnly:{ name: '会計課長のみ',         css: 'rank-kacho',  pip: 'p-kacho',  bar: 2, emoji: '🧾', msg: '会計課長の専決案件！会計課長のみが処理します！'        },
+  shobohonbuOnly:{ name: '消防本部総務課長のみ', css: 'rank-kacho',  pip: 'p-kacho',  bar: 2, emoji: '🚒', msg: '消防本部総務課長の専決案件！'                         },
+  jicho:         { name: '部等の次長等',         css: 'rank-jicho',  pip: 'p-jicho',  bar: 3, emoji: '📂', msg: 'ちょっと大きめ！次長等クラスの案件です！'              },
+  bucho:         { name: '部長等',               css: 'rank-bucho',  pip: 'p-bucho',  bar: 4, emoji: '🔑', msg: 'かなりの大型案件！部長等の出番！'                     },
+  fuku:          { name: '副市長',               css: 'rank-fuku',   pip: 'p-fuku',   bar: 5, emoji: '👑', msg: '大型！副市長マター！市全体を揺るがすスケール！'         },
+  shicho:        { name: '市　長',               css: 'rank-shicho', pip: 'p-shicho', bar: 6, emoji: '🏛️', msg: '超大型案件！これは市長決裁！！市が動く！！！' },
 };
 
 // ===== 別表２ 判定ルール（予定価格） =====
@@ -487,17 +490,18 @@ const B3_RULES = {
 // 根拠：予算の編成及び執行に関する規則 別表第1
 // ここでは「市長」も登場しうる（交際費 10万円以上）
 const SFA_RULES = {
-  // 1〜6節（人件費系、全額課長等）
+  // 1〜6節（人件費系）
+  // ※人事課長のみ／消防本部総務課長のみの区分は該当専決者のみ処理可
   's1a': { tiers:[{th:0,rank:'kacho'}] },
-  's1b': { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
-  's2':  { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
-  's3a': { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
+  's1b': { tiers:[{th:0,rank:'jinjichoOnly'}] },
+  's2':  { tiers:[{th:0,rank:'jinjichoOnly'}] },
+  's3a': { tiers:[{th:0,rank:'jinjichoOnly'}] },
   's3b': { tiers:[{th:0,rank:'kacho'}] },
-  's4a': { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
+  's4a': { tiers:[{th:0,rank:'jinjichoOnly'}] },
   's4b': { tiers:[{th:0,rank:'kacho'}] },
-  's5a': { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
-  's5b': { tiers:[{th:0,rank:'kacho'}], note:'消防本部総務課長合議' },
-  's6':  { tiers:[{th:0,rank:'kacho'}], note:'人事課長合議' },
+  's5a': { tiers:[{th:0,rank:'jinjichoOnly'}] },
+  's5b': { tiers:[{th:0,rank:'shobohonbuOnly'}] },
+  's6':  { tiers:[{th:0,rank:'jinjichoOnly'}] },
 
   // 7節 報償費
   // 100万円以上→副市長, 50〜100万円未満→部長等, 50万円未満→課長等
@@ -523,20 +527,21 @@ const SFA_RULES = {
   's10b':{ tiers:[{th:500,rank:'bucho'},{th:5,rank:'jicho'},{th:0,rank:'kacho'}] },
   // 光熱水費（一般）：5万円以上→課長等, 5万円未満→専任課長等
   's10c':{ tiers:[{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}] },
-  's10d':{ tiers:[{th:0,rank:'kacho'}], note:'会計課長合議' },
+  's10d':{ tiers:[{th:0,rank:'kaikakachoOnly'}] },
   // 飲食料費：50万円以上→副市長, 30〜50万円未満→部長等, 10〜30万円未満→部等の次長等, 10万円未満→課長等
   's10e':{ tiers:[{th:50,rank:'fuku'},{th:30,rank:'bucho'},{th:10,rank:'jicho'},{th:0,rank:'kacho'}], note:'接待用は副市長＋財務部長・財政課長合議が必要' },
   // 物品を除く修繕料：5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等, 15000万円以上→市長
   's10f':     { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'130万円超は技術関係担当課長・財務部合議' },
   // 修繕料の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
-  's10f_henko':{ tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 130万円超は技術関係担当課長・財務部合議' },
+  // 1500万円以上→市長, 500〜1500万円未満→副市長, 300〜500万円未満→部長等, 100〜300万円未満→次長等, 100万円未満→課長等
+  's10f_henko':{ tiers:[{th:1500,rank:'shicho'},{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 130万円超は技術関係担当課長・財務部合議' },
 
   // 11節 役務費
   // 一般：1000万円以上→部長等, 500〜1000万円未満→部等の次長等, 5〜500万円未満→課長等, 5万円未満→専任課長等
   's11a':{ tiers:[{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}], note:'500万円以上は財政課長合議' },
   's11b':{ tiers:[{th:500,rank:'jicho'},{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}] },
   's11c':{ tiers:[{th:0,rank:'kacho'}] },
-  's11d':{ tiers:[{th:0,rank:'kacho'}], note:'会計課長合議' },
+  's11d':{ tiers:[{th:0,rank:'kaikakachoOnly'}] },
 
   // 12節 委託料
   // 一般：1500万円以上→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
@@ -544,7 +549,8 @@ const SFA_RULES = {
   // 測量・調査・設計・監理等：5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等, 15000万円以上→市長
   's12b':     { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'50万円超は技術関係担当課長・財務部合議' },
   // 測量等の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
-  's12b_henko':{ tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 50万円超は技術関係担当課長・財務部合議' },
+  // 1500万円以上→市長, 500〜1500万円未満→副市長, 300〜500万円未満→部長等, 100〜300万円未満→次長等, 100万円未満→課長等
+  's12b_henko':{ tiers:[{th:1500,rank:'shicho'},{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 50万円超は技術関係担当課長・財務部合議' },
   's12c':{ tiers:[{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}] },
 
   // 13節 使用料及び賃借料
@@ -552,13 +558,14 @@ const SFA_RULES = {
   's13a':{ tiers:[{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部・不動産は資産経営課長合議' },
   // 単価契約：1000万円以上→部長等, 500〜1000万円未満→部等の次長等, 5〜500万円未満→課長等, 5万円未満→専任課長等
   's13b':{ tiers:[{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}] },
-  's13c':{ tiers:[{th:0,rank:'kacho'}], note:'会計課長合議' },
+  's13c':{ tiers:[{th:0,rank:'kaikakachoOnly'}] },
 
   // 14節 工事請負費
   // 15000万円以上→市長, 5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等
   's14':      { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'技術関係担当課長・財務部合議' },
   // 工事請負費の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
-  's14_henko': { tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 技術関係担当課長・財務部合議' },
+  // 1500万円以上→市長, 500〜1500万円未満→副市長, 300〜500万円未満→部長等, 100〜300万円未満→次長等, 100万円未満→課長等
+  's14_henko': { tiers:[{th:1500,rank:'shicho'},{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 技術関係担当課長・財務部合議' },
 
   // 15節 原材料費
   // 一般：300万円以上→部等の次長等, 5〜300万円未満→課長等, 5万円未満→専任課長等
@@ -567,14 +574,14 @@ const SFA_RULES = {
   's15b':{ tiers:[{th:500,rank:'jicho'},{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}] },
 
   // 16節 公有財産購入費
-  // 一般：1500万円以上→副市長, 1500万円未満→部長等（全体）
-  's16a':{ tiers:[{th:1500,rank:'fuku'},{th:0,rank:'bucho'}], note:'資産経営課長合議、100万円以上は財務部合議' },
-  // 公共事業用地：1500万円以上→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
-  's16b':{ tiers:[{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部・道水路以外の用地取得は資産経営課長合議' },
+  // 一般：3000万円以上→市長, 1500〜3000万円未満→副市長, 1500万円未満→部長等
+  's16a':{ tiers:[{th:3000,rank:'shicho'},{th:1500,rank:'fuku'},{th:0,rank:'bucho'}], note:'資産経営課長合議、100万円以上は財務部合議' },
+  // 公共事業用地：3000万円以上→市長, 1500〜3000万円未満→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→次長等, 500万円未満→課長等
+  's16b':{ tiers:[{th:3000,rank:'shicho'},{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部・道水路以外の用地取得は資産経営課長合議' },
 
   // 17節 備品購入費
-  // 1500万円以上→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
-  's17': { tiers:[{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部・自動車は資産経営課長合議' },
+  // 3000万円以上→市長, 1500〜3000万円未満→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→次長等, 500万円未満→課長等
+  's17': { tiers:[{th:3000,rank:'shicho'},{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部・自動車は資産経営課長合議' },
 
   // 18節 負担金・補助及び交付金
   // 一般：1500万円以上→部長等, 1000〜1500万円未満→部等の次長等, 50〜1000万円未満→課長等, 50万円未満→専任課長等
@@ -596,8 +603,8 @@ const SFA_RULES = {
   's21b':{ tiers:[{th:5000,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部合議' },
   // 尾張一宮駅前ビル補償：1000万円以上→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
   's21c':{ tiers:[{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}] },
-  // 賠償金：全額部長等（上限なし）
-  's21d':{ tiers:[{th:0,rank:'bucho'}], note:'財政課長・車両・不動産は資産経営課長合議' },
+  // 賠償金：50万円以上→市長, 50万円未満→副市長
+  's21d':{ tiers:[{th:50,rank:'shicho'},{th:0,rank:'fuku'}], note:'財政課長・車両・不動産は資産経営課長合議' },
 
   // 22節 償還金・利子及び割引料
   // 一般：10万円以上→部等の次長等, 10万円未満→課長等
@@ -640,7 +647,7 @@ function fmtAmount(val) {
 function showResult(elId, rankKey, amountWan, subLabel, note) {
   const r  = RANKS[rankKey];
   const el = document.getElementById(elId);
-  const bang = { shicho:'！！！！！', fuku:'！！！！', bucho:'！！！', jicho:'！！', kacho:'！', senninkacho:'！' }[rankKey] || '！';
+  const bang = { shicho:'！！！！！', fuku:'！！！！', bucho:'！！！', jicho:'！！', kacho:'！', senninkacho:'！', jinjichoOnly:'！！！', kaikakachoOnly:'！！！', shobohonbuOnly:'！！！' }[rankKey] || '！';
 
   // 6段階ランクバー
   let pips = '';
