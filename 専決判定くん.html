@@ -336,7 +336,8 @@
         <option value="s10c">10 需用費（下記以外の光熱水費）</option>
         <option value="s10d">10 需用費（公共料金システム処理の光熱水費）</option>
         <option value="s10e">10 需用費（飲食料費）</option>
-        <option value="s10f">10 需用費（物品を除く修繕料）</option>
+        <option value="s10f">10 需用費（物品を除く修繕料・下記以外のもの）</option>
+        <option value="s10f_henko">10 需用費（修繕料 変更契約のうち軽微なもの）</option>
         <option value="s11a">11 役務費（下記以外のもの）</option>
         <option value="s11b">11 役務費（単価契約によるもの）</option>
         <option value="s11c">11 役務費（医療費審査支払等手数料・通信運搬費）</option>
@@ -344,12 +345,14 @@
       </optgroup>
       <optgroup label="12〜17節 委託・使用料・工事等">
         <option value="s12a">12 委託料（下記以外のもの）</option>
-        <option value="s12b">12 委託料（測量・調査・設計・監理等）</option>
+        <option value="s12b">12 委託料（測量・調査・設計・監理等・下記以外のもの）</option>
+        <option value="s12b_henko">12 委託料（測量等 変更契約のうち軽微なもの）</option>
         <option value="s12c">12 委託料（単価契約によるもの）</option>
         <option value="s13a">13 使用料及び賃借料（下記以外のもの）</option>
         <option value="s13b">13 使用料及び賃借料（単価契約によるもの）</option>
         <option value="s13c">13 使用料及び賃借料（公共料金システム処理テレビ受信料）</option>
         <option value="s14">14 工事請負費（下記以外のもの）</option>
+        <option value="s14_henko">14 工事請負費（変更契約のうち軽微なもの）</option>
         <option value="s15a">15 原材料費（下記以外のもの）</option>
         <option value="s15b">15 原材料費（単価契約によるもの）</option>
         <option value="s16a">16 公有財産購入費（下記以外のもの）</option>
@@ -407,8 +410,8 @@ const RANKS = {
 // ===== 別表２ 判定ルール（予定価格） =====
 // [閾値（万円）降順, ランクキー] — 閾値以上のとき適用
 const B2_RULES = {
-  kouji:       [[5000,'fuku'],[3000,'bucho'],[1000,'jicho'],[0,'kacho']],
-  measurement: [[5000,'fuku'],[3000,'bucho'],[1000,'jicho'],[0,'kacho']],
+  kouji:       [[15000,'shicho'],[5000,'fuku'],[3000,'bucho'],[1000,'jicho'],[0,'kacho']],
+  measurement: [[15000,'shicho'],[5000,'fuku'],[3000,'bucho'],[1000,'jicho'],[0,'kacho']],
   goods:       [[3000,'fuku'],[1000,'bucho'],[ 500,'jicho'],[0,'kacho']],
   consign:     [[3000,'fuku'],[1000,'bucho'],[ 500,'jicho'],[0,'kacho']],
 };
@@ -523,8 +526,10 @@ const SFA_RULES = {
   's10d':{ tiers:[{th:0,rank:'kacho'}], note:'会計課長合議' },
   // 飲食料費：50万円以上→副市長, 30〜50万円未満→部長等, 10〜30万円未満→部等の次長等, 10万円未満→課長等
   's10e':{ tiers:[{th:50,rank:'fuku'},{th:30,rank:'bucho'},{th:10,rank:'jicho'},{th:0,rank:'kacho'}], note:'接待用は副市長＋財務部長・財政課長合議が必要' },
-  // 物品を除く修繕料：5000万円以上→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等
-  's10f':{ tiers:[{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'130万円超は技術関係担当課長・財務部合議' },
+  // 物品を除く修繕料：5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等, 15000万円以上→市長
+  's10f':     { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'130万円超は技術関係担当課長・財務部合議' },
+  // 修繕料の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
+  's10f_henko':{ tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 130万円超は技術関係担当課長・財務部合議' },
 
   // 11節 役務費
   // 一般：1000万円以上→部長等, 500〜1000万円未満→部等の次長等, 5〜500万円未満→課長等, 5万円未満→専任課長等
@@ -536,8 +541,10 @@ const SFA_RULES = {
   // 12節 委託料
   // 一般：1500万円以上→副市長, 1000〜1500万円未満→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
   's12a':{ tiers:[{th:1500,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部合議' },
-  // 測量・調査・設計・監理等：5000万円以上→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等
-  's12b':{ tiers:[{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'50万円超は技術関係担当課長・財務部合議' },
+  // 測量・調査・設計・監理等：5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等, 15000万円以上→市長
+  's12b':     { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'50万円超は技術関係担当課長・財務部合議' },
+  // 測量等の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
+  's12b_henko':{ tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 50万円超は技術関係担当課長・財務部合議' },
   's12c':{ tiers:[{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}] },
 
   // 13節 使用料及び賃借料
@@ -548,8 +555,10 @@ const SFA_RULES = {
   's13c':{ tiers:[{th:0,rank:'kacho'}], note:'会計課長合議' },
 
   // 14節 工事請負費
-  // 5000万円以上→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等
-  's14': { tiers:[{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'技術関係担当課長・財務部合議' },
+  // 15000万円以上→市長, 5000〜15000万円未満→副市長, 3000〜5000万円未満→部長等, 1000〜3000万円未満→部等の次長等, 1000万円未満→課長等
+  's14':      { tiers:[{th:15000,rank:'shicho'},{th:5000,rank:'fuku'},{th:3000,rank:'bucho'},{th:1000,rank:'jicho'},{th:0,rank:'kacho'}], note:'技術関係担当課長・財務部合議' },
+  // 工事請負費の変更契約（変更増減額が契約金額の10%未満かつ軽微なもの）：変更増減額で判定
+  's14_henko': { tiers:[{th:500,rank:'fuku'},{th:300,rank:'bucho'},{th:100,rank:'jicho'},{th:0,rank:'kacho'}], note:'変更増減額で判定 ／ 技術関係担当課長・財務部合議' },
 
   // 15節 原材料費
   // 一般：300万円以上→部等の次長等, 5〜300万円未満→課長等, 5万円未満→専任課長等
@@ -581,8 +590,8 @@ const SFA_RULES = {
   's20': { tiers:[{th:1500,rank:'fuku'},{th:0,rank:'bucho'}], note:'財政課長・債権は資産経営課長合議' },
 
   // 21節 補償・補填・賠償金
-  // 下記以外の補償金・補填金：1500万円以上→副市長, 1500万円未満→部長等
-  's21a':{ tiers:[{th:1500,rank:'fuku'},{th:0,rank:'bucho'}], note:'財政課長合議' },
+  // 下記以外の補償金・補填金：副市長列=1,500未満（上限あり）→ 1500万円以上は市長決裁
+  's21a':{ tiers:[{th:1500,rank:'shicho'},{th:0,rank:'fuku'}], note:'財政課長合議' },
   // 公共事業移転補償：5000万円以上→副市長, 1000〜5000万円未満→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
   's21b':{ tiers:[{th:5000,rank:'fuku'},{th:1000,rank:'bucho'},{th:500,rank:'jicho'},{th:0,rank:'kacho'}], note:'財務部合議' },
   // 尾張一宮駅前ビル補償：1000万円以上→部長等, 500〜1000万円未満→部等の次長等, 500万円未満→課長等
