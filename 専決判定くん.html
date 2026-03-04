@@ -522,9 +522,9 @@ const SFA_RULES = {
   's9':  { tiers:[{th:10,rank:'shicho'},{th:0,rank:'fuku'}], note:'財政課長合議 ／ 議会関係は全額議会局長専決' },
 
   // 10節 需用費
-  // 一般：500万円以上→部長等, 5〜500万円未満→部等の次長等, 5万円未満→課長等
-  's10a':{ tiers:[{th:500,rank:'bucho'},{th:5,rank:'jicho'},{th:0,rank:'kacho'}], note:'500万円以上は財政課長・資産経営課長合議' },
-  's10b':{ tiers:[{th:500,rank:'bucho'},{th:5,rank:'jicho'},{th:0,rank:'kacho'}] },
+  // 一般：500万円以上→部長等, 5〜500万円未満→部等の次長等, 5万円未満→専任課長等
+  's10a':{ tiers:[{th:500,rank:'bucho'},{th:5,rank:'jicho'},{th:0,rank:'senninkacho'}], note:'500万円以上は財政課長・資産経営課長合議' },
+  's10b':{ tiers:[{th:500,rank:'bucho'},{th:5,rank:'jicho'},{th:0,rank:'senninkacho'}] },
   // 光熱水費（一般）：5万円以上→課長等, 5万円未満→専任課長等
   's10c':{ tiers:[{th:5,rank:'kacho'},{th:0,rank:'senninkacho'}] },
   's10d':{ tiers:[{th:0,rank:'kaikakachoOnly'}] },
