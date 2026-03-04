@@ -210,12 +210,12 @@
 <p class="subtitle">一宮市専決規程・予算執行規則 ― 金額を入れると、誰が専決できるか即判定！</p>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('b2', this)">別表２<br>予定価格</button>
-  <button class="tab-btn"       onclick="switchTab('b3', this)">別表３<br>支出命令</button>
-  <button class="tab-btn"       onclick="switchTab('sfa', this)">支出負担行為<br>専決区分</button>
+  <button class="tab-btn active" onclick="switchTab('b2', this)">予定価格</button>
+  <button class="tab-btn"       onclick="switchTab('sfa', this)">支出負担行為</button>
+  <button class="tab-btn"       onclick="switchTab('b3', this)">支出命令</button>
 </div>
 
-<!-- ===== 別表２ 予定価格 ===== -->
+<!-- ===== 予定価格 ===== -->
 <div class="tab-content active" id="tab-b2">
   <div class="form-card">
     <label>契約の種類</label>
@@ -236,147 +236,17 @@
   <div id="result-b2"><span class="result-empty">種類と金額を入力してください</span></div>
 </div>
 
-<!-- ===== 別表３ 支出命令 ===== -->
-<div class="tab-content" id="tab-b3">
-  <div class="form-card">
-    <label>節・区分</label>
-    <select id="b3-type" onchange="clearResult('b3')">
-      <option value="">── 選択してください ──</option>
-      <optgroup label="1〜6節 人件費系">
-        <option value="1a">1 報酬（下記以外のもの）</option>
-        <option value="1b">1 報酬（会計年度任用職員報酬）</option>
-        <option value="2">2 給料</option>
-        <option value="3a">3 職員手当等（下記以外のもの）</option>
-        <option value="3b">3 職員手当等（議員期末手当）</option>
-        <option value="4a">4 共済費（下記以外のもの）</option>
-        <option value="4b">4 共済費（消防団員等公務災害補償・議員共済費）</option>
-        <option value="5a">5 災害補償費（下記以外のもの）</option>
-        <option value="5b">5 災害補償費（消防団員等公務災害補償費）</option>
-        <option value="6">6 恩給及び退職年金</option>
-      </optgroup>
-      <optgroup label="7〜11節 報償・旅費・交際・消耗品等">
-        <option value="7a">7 報償費（下記以外のもの）</option>
-        <option value="7b">7 報償費（災害見舞金）</option>
-        <option value="8a">8 旅費（下記以外のもの）</option>
-        <option value="8b">8 旅費（会計年度任用職員通勤費）</option>
-        <option value="9">9 交際費</option>
-        <option value="10a">10 需用費（下記以外のもの）</option>
-        <option value="10b">10 需用費（下記以外の光熱水費）</option>
-        <option value="10c">10 需用費（公共料金システム処理の光熱水費）</option>
-        <option value="10d">10 需用費（飲食料費）</option>
-        <option value="10e">10 需用費（物品を除く修繕料）</option>
-        <option value="11a">11 役務費（下記以外のもの）</option>
-        <option value="11b">11 役務費（医療費審査支払等手数料・通信運搬費）</option>
-        <option value="11c">11 役務費（公共料金システム処理の通信運搬費）</option>
-      </optgroup>
-      <optgroup label="12〜17節 委託・使用料・工事等">
-        <option value="12a">12 委託料（下記以外のもの）</option>
-        <option value="12b">12 委託料（単価契約によるもの）</option>
-        <option value="13a">13 使用料及び賃借料（下記以外のもの）</option>
-        <option value="13b">13 使用料及び賃借料（下記以外の単価契約によるもの）</option>
-        <option value="13c">13 使用料及び賃借料（公共料金システム処理のテレビ受信料）</option>
-        <option value="14">14 工事請負費</option>
-        <option value="15">15 原材料費</option>
-        <option value="16">16 公有財産購入費</option>
-        <option value="17">17 備品購入費</option>
-      </optgroup>
-      <optgroup label="18〜27節 負担金・補助・扶助・その他">
-        <option value="18a">18 負担金・補助及び交付金（下記以外のもの）</option>
-        <option value="18b">18 負担金・補助及び交付金（奨学金・保険給付費等）</option>
-        <option value="19">19 扶助費</option>
-        <option value="20">20 貸付金</option>
-        <option value="21">21 補償・補填及び賠償金</option>
-        <option value="22a">22 償還金・利子及び割引料（下記以外のもの）</option>
-        <option value="22b">22 償還金・利子及び割引料（税還付金・還付加算金）</option>
-        <option value="23">23 投資及び出資金</option>
-        <option value="24">24 積立金</option>
-        <option value="25">25 寄附金</option>
-        <option value="26">26 公課費</option>
-        <option value="27">27 繰出金</option>
-      </optgroup>
-    </select>
-    <label>金額（万円）</label>
-    <div class="amount-row">
-      <div><input type="number" id="b3-amount" min="0" step="0.01" placeholder="例：150" oninput="clearResult('b3')"></div>
-      <div class="unit-label">万円</div>
-    </div>
-    <button class="btn-judge" onclick="judgeB3()">判　定　！</button>
-  </div>
-  <div id="result-b3"><span class="result-empty">節・区分と金額を入力してください</span></div>
-</div>
-
 <!-- ===== 支出負担行為 ===== -->
 <div class="tab-content" id="tab-sfa">
   <div class="form-card">
-    <label>節・区分</label>
-    <select id="sfa-type" onchange="clearResult('sfa')">
-      <option value="">── 選択してください ──</option>
-      <optgroup label="1〜6節 人件費系">
-        <option value="s1a">1 報酬（下記以外のもの）</option>
-        <option value="s1b">1 報酬（会計年度任用職員報酬）</option>
-        <option value="s2">2 給料</option>
-        <option value="s3a">3 職員手当等（下記以外のもの）</option>
-        <option value="s3b">3 職員手当等（議員期末手当）</option>
-        <option value="s4a">4 共済費（下記以外のもの）</option>
-        <option value="s4b">4 共済費（消防団員等・議員共済費）</option>
-        <option value="s5a">5 災害補償費（下記以外のもの）</option>
-        <option value="s5b">5 災害補償費（消防団員等公務災害補償費）</option>
-        <option value="s6">6 恩給及び退職年金</option>
-      </optgroup>
-      <optgroup label="7〜11節 報償・旅費・交際・消耗品等">
-        <option value="s7a">7 報償費（下記以外のもの）</option>
-        <option value="s7b">7 報償費（災害見舞金）</option>
-        <option value="s8a">8 旅費（宿泊を伴う旅行）</option>
-        <option value="s8b">8 旅費（日帰り旅行）</option>
-        <option value="s8c">8 旅費（転居費・家族移転費）</option>
-        <option value="s8d">8 旅費（会計年度任用職員通勤費）</option>
-        <option value="s9">9 交際費 ⚠️</option>
-        <option value="s10a">10 需用費（下記以外のもの）</option>
-        <option value="s10b">10 需用費（単価契約によるもの）</option>
-        <option value="s10c">10 需用費（下記以外の光熱水費）</option>
-        <option value="s10d">10 需用費（公共料金システム処理の光熱水費）</option>
-        <option value="s10e">10 需用費（飲食料費）</option>
-        <option value="s10f">10 需用費（物品を除く修繕料・下記以外のもの）</option>
-        <option value="s10f_henko">10 需用費（修繕料 変更契約のうち軽微なもの）</option>
-        <option value="s11a">11 役務費（下記以外のもの）</option>
-        <option value="s11b">11 役務費（単価契約によるもの）</option>
-        <option value="s11c">11 役務費（医療費審査支払等手数料・通信運搬費）</option>
-        <option value="s11d">11 役務費（公共料金システム処理の通信運搬費）</option>
-      </optgroup>
-      <optgroup label="12〜17節 委託・使用料・工事等">
-        <option value="s12a">12 委託料（下記以外のもの）</option>
-        <option value="s12b">12 委託料（測量・調査・設計・監理等・下記以外のもの）</option>
-        <option value="s12b_henko">12 委託料（測量等 変更契約のうち軽微なもの）</option>
-        <option value="s12c">12 委託料（単価契約によるもの）</option>
-        <option value="s13a">13 使用料及び賃借料（下記以外のもの）</option>
-        <option value="s13b">13 使用料及び賃借料（単価契約によるもの）</option>
-        <option value="s13c">13 使用料及び賃借料（公共料金システム処理テレビ受信料）</option>
-        <option value="s14">14 工事請負費（下記以外のもの）</option>
-        <option value="s14_henko">14 工事請負費（変更契約のうち軽微なもの）</option>
-        <option value="s15a">15 原材料費（下記以外のもの）</option>
-        <option value="s15b">15 原材料費（単価契約によるもの）</option>
-        <option value="s16a">16 公有財産購入費（下記以外のもの）</option>
-        <option value="s16b">16 公有財産購入費（公共事業用地）</option>
-        <option value="s17">17 備品購入費</option>
-      </optgroup>
-      <optgroup label="18〜27節 負担金・補助・扶助・その他">
-        <option value="s18a">18 負担金・補助及び交付金（下記以外のもの）</option>
-        <option value="s18b">18 負担金・補助及び交付金（奨学金・保険給付費等）</option>
-        <option value="s19">19 扶助費</option>
-        <option value="s20">20 貸付金</option>
-        <option value="s21a">21 補償金・補填金（下記以外のもの）</option>
-        <option value="s21b">21 補償金（公共事業施行に伴う移転補償）</option>
-        <option value="s21c">21 補償金（尾張一宮駅前ビル駐車場料金減免分）</option>
-        <option value="s21d">21 賠償金</option>
-        <option value="s22a">22 償還金・利子及び割引料（下記以外のもの）</option>
-        <option value="s22b">22 償還金（税還付金・還付加算金）</option>
-        <option value="s23">23 投資及び出資金</option>
-        <option value="s24">24 積立金</option>
-        <option value="s25">25 寄附金</option>
-        <option value="s26">26 公課費</option>
-        <option value="s27">27 繰出金</option>
-      </optgroup>
+    <label>節</label>
+    <select id="sfa-sec" onchange="onSFASecChange()">
+      <option value="">── 節を選んでください ──</option>
     </select>
+    <div id="sfa-sub-wrap" style="display:none">
+      <label>区分</label>
+      <select id="sfa-sub" onchange="clearResult('sfa')"></select>
+    </div>
     <label>金額（万円）</label>
     <div class="amount-row">
       <div><input type="number" id="sfa-amount" min="0" step="0.01" placeholder="例：800" oninput="clearResult('sfa')"></div>
@@ -385,6 +255,27 @@
     <button class="btn-judge" onclick="judgeSFA()">判　定　！</button>
   </div>
   <div id="result-sfa"><span class="result-empty">節・区分と金額を入力してください</span></div>
+</div>
+
+<!-- ===== 支出命令 ===== -->
+<div class="tab-content" id="tab-b3">
+  <div class="form-card">
+    <label>節</label>
+    <select id="b3-sec" onchange="onB3SecChange()">
+      <option value="">── 節を選んでください ──</option>
+    </select>
+    <div id="b3-sub-wrap" style="display:none">
+      <label>区分</label>
+      <select id="b3-sub" onchange="clearResult('b3')"></select>
+    </div>
+    <label>金額（万円）</label>
+    <div class="amount-row">
+      <div><input type="number" id="b3-amount" min="0" step="0.01" placeholder="例：150" oninput="clearResult('b3')"></div>
+      <div class="unit-label">万円</div>
+    </div>
+    <button class="btn-judge" onclick="judgeB3()">判　定　！</button>
+  </div>
+  <div id="result-b3"><span class="result-empty">節・区分と金額を入力してください</span></div>
 </div>
 
 <script>
@@ -688,33 +579,144 @@ function judgeB2() {
   showResult('result-b2', rankKey, amount, label, null);
 }
 
+// ===== 節マップ（2段階セレクト用） s=[[key, label|null], ...] =====
+const B3_SEC = {
+  '1':  {n:'1 報酬',                    s:[['1a','下記以外のもの'],['1b','会計年度任用職員報酬']]},
+  '2':  {n:'2 給料',                    s:[['2',null]]},
+  '3':  {n:'3 職員手当等',              s:[['3a','下記以外のもの'],['3b','議員期末手当']]},
+  '4':  {n:'4 共済費',                  s:[['4a','下記以外のもの'],['4b','消防団員等・議員共済費']]},
+  '5':  {n:'5 災害補償費',              s:[['5a','下記以外のもの'],['5b','消防団員等公務災害補償費']]},
+  '6':  {n:'6 恩給及び退職年金',        s:[['6',null]]},
+  '7':  {n:'7 報償費',                  s:[['7a','下記以外のもの'],['7b','災害見舞金']]},
+  '8':  {n:'8 旅費',                    s:[['8a','下記以外のもの'],['8b','会計年度任用職員通勤費']]},
+  '9':  {n:'9 交際費',                  s:[['9',null]]},
+  '10': {n:'10 需用費',                 s:[['10a','下記以外のもの'],['10b','下記以外の光熱水費'],['10c','公共料金システム処理の光熱水費'],['10d','飲食料費'],['10e','物品を除く修繕料']]},
+  '11': {n:'11 役務費',                 s:[['11a','下記以外のもの'],['11b','医療費審査支払等手数料・通信運搬費'],['11c','公共料金システム処理の通信運搬費']]},
+  '12': {n:'12 委託料',                 s:[['12a','下記以外のもの'],['12b','単価契約によるもの']]},
+  '13': {n:'13 使用料及び賃借料',       s:[['13a','下記以外のもの'],['13b','下記以外の単価契約'],['13c','公共料金システム処理テレビ受信料']]},
+  '14': {n:'14 工事請負費',             s:[['14',null]]},
+  '15': {n:'15 原材料費',               s:[['15',null]]},
+  '16': {n:'16 公有財産購入費',         s:[['16',null]]},
+  '17': {n:'17 備品購入費',             s:[['17',null]]},
+  '18': {n:'18 負担金・補助及び交付金', s:[['18a','下記以外のもの'],['18b','奨学金・保険給付費等']]},
+  '19': {n:'19 扶助費',                 s:[['19',null]]},
+  '20': {n:'20 貸付金',                 s:[['20',null]]},
+  '21': {n:'21 補償・補填及び賠償金',   s:[['21',null]]},
+  '22': {n:'22 償還金・利子及び割引料', s:[['22a','下記以外のもの'],['22b','税還付金・還付加算金']]},
+  '23': {n:'23 投資及び出資金',         s:[['23',null]]},
+  '24': {n:'24 積立金',                 s:[['24',null]]},
+  '25': {n:'25 寄附金',                 s:[['25',null]]},
+  '26': {n:'26 公課費',                 s:[['26',null]]},
+  '27': {n:'27 繰出金',                 s:[['27',null]]},
+};
+
+const SFA_SEC = {
+  '1':  {n:'1 報酬',                    s:[['s1a','下記以外のもの'],['s1b','会計年度任用職員報酬']]},
+  '2':  {n:'2 給料',                    s:[['s2',null]]},
+  '3':  {n:'3 職員手当等',              s:[['s3a','下記以外のもの'],['s3b','議員期末手当']]},
+  '4':  {n:'4 共済費',                  s:[['s4a','下記以外のもの'],['s4b','消防団員等・議員共済費']]},
+  '5':  {n:'5 災害補償費',              s:[['s5a','下記以外のもの'],['s5b','消防団員等公務災害補償費']]},
+  '6':  {n:'6 恩給及び退職年金',        s:[['s6',null]]},
+  '7':  {n:'7 報償費',                  s:[['s7a','下記以外のもの'],['s7b','災害見舞金']]},
+  '8':  {n:'8 旅費',                    s:[['s8a','宿泊を伴う旅行'],['s8b','日帰り旅行'],['s8c','転居費・家族移転費'],['s8d','会計年度任用職員通勤費']]},
+  '9':  {n:'9 交際費 ⚠️',             s:[['s9',null]]},
+  '10': {n:'10 需用費',                 s:[['s10a','下記以外のもの'],['s10b','単価契約によるもの'],['s10c','下記以外の光熱水費'],['s10d','公共料金システム処理の光熱水費'],['s10e','飲食料費'],['s10f','物品を除く修繕料（下記以外のもの）'],['s10f_henko','修繕料 変更契約・軽微なもの']]},
+  '11': {n:'11 役務費',                 s:[['s11a','下記以外のもの'],['s11b','単価契約によるもの'],['s11c','医療費審査支払等手数料・通信運搬費'],['s11d','公共料金システム処理の通信運搬費']]},
+  '12': {n:'12 委託料',                 s:[['s12a','下記以外のもの'],['s12b','測量・調査・設計・監理等（下記以外のもの）'],['s12b_henko','測量等 変更契約・軽微なもの'],['s12c','単価契約によるもの']]},
+  '13': {n:'13 使用料及び賃借料',       s:[['s13a','下記以外のもの'],['s13b','単価契約によるもの'],['s13c','公共料金システム処理テレビ受信料']]},
+  '14': {n:'14 工事請負費',             s:[['s14','下記以外のもの'],['s14_henko','変更契約・軽微なもの']]},
+  '15': {n:'15 原材料費',               s:[['s15a','下記以外のもの'],['s15b','単価契約によるもの']]},
+  '16': {n:'16 公有財産購入費',         s:[['s16a','下記以外のもの'],['s16b','公共事業用地']]},
+  '17': {n:'17 備品購入費',             s:[['s17',null]]},
+  '18': {n:'18 負担金・補助及び交付金', s:[['s18a','下記以外のもの'],['s18b','奨学金・保険給付費等']]},
+  '19': {n:'19 扶助費',                 s:[['s19',null]]},
+  '20': {n:'20 貸付金',                 s:[['s20',null]]},
+  '21': {n:'21 補償・補填及び賠償金',   s:[['s21a','下記以外の補償金・補填金'],['s21b','公共事業移転補償'],['s21c','尾張一宮駅前ビル補償'],['s21d','賠償金']]},
+  '22': {n:'22 償還金・利子及び割引料', s:[['s22a','下記以外のもの'],['s22b','税還付金・還付加算金']]},
+  '23': {n:'23 投資及び出資金',         s:[['s23',null]]},
+  '24': {n:'24 積立金',                 s:[['s24',null]]},
+  '25': {n:'25 寄附金',                 s:[['s25',null]]},
+  '26': {n:'26 公課費',                 s:[['s26',null]]},
+  '27': {n:'27 繰出金',                 s:[['s27',null]]},
+};
+
+// ===== 節セレクト初期化 =====
+function initSecSelects() {
+  [['b3-sec', B3_SEC], ['sfa-sec', SFA_SEC]].forEach(([id, MAP]) => {
+    const sel = document.getElementById(id);
+    Object.entries(MAP).forEach(([k, {n}]) => {
+      const opt = document.createElement('option');
+      opt.value = k; opt.textContent = n;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+// ===== 2段階セレクト変更 =====
+function onSecChange(tab) {
+  const MAP  = tab === 'b3' ? B3_SEC : SFA_SEC;
+  const sec  = document.getElementById(tab + '-sec').value;
+  const wrap = document.getElementById(tab + '-sub-wrap');
+  const sub  = document.getElementById(tab + '-sub');
+  clearResult(tab);
+  if (!sec) { wrap.style.display = 'none'; return; }
+  const items = MAP[sec].s;
+  if (items.length === 1) {
+    wrap.style.display = 'none';
+  } else {
+    sub.innerHTML = items.map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+    wrap.style.display = 'block';
+  }
+}
+function onB3SecChange()  { onSecChange('b3');  }
+function onSFASecChange() { onSecChange('sfa'); }
+
+// ===== 判定キー・ラベル取得 =====
+function getKey(tab) {
+  const MAP   = tab === 'b3' ? B3_SEC : SFA_SEC;
+  const sec   = document.getElementById(tab + '-sec').value;
+  if (!sec) return null;
+  const items = MAP[sec].s;
+  if (items.length === 1) return items[0][0];
+  return document.getElementById(tab + '-sub').value || null;
+}
+function getLabel(tab) {
+  const MAP  = tab === 'b3' ? B3_SEC : SFA_SEC;
+  const sec  = document.getElementById(tab + '-sec').value;
+  if (!sec) return '';
+  const {n, s} = MAP[sec];
+  if (s.length === 1) return n;
+  const subSel = document.getElementById(tab + '-sub');
+  const subTxt = subSel.options[subSel.selectedIndex] ? subSel.options[subSel.selectedIndex].text : '';
+  return subTxt ? n + ' ／ ' + subTxt : n;
+}
+
 // ===== 別表３ 判定 =====
 function judgeB3() {
-  const typeVal = document.getElementById('b3-type').value;
+  const typeVal = getKey('b3');
   const amount  = parseFloat(document.getElementById('b3-amount').value);
-  if (!typeVal)              { alert('節・区分を選択してください。'); return; }
+  if (!typeVal)               { alert('節・区分を選択してください。'); return; }
   if (isNaN(amount)||amount<0){ alert('金額を正しく入力してください（万円単位）。'); return; }
   const rule = B3_RULES[typeVal];
   let rankKey = rule.tiers[rule.tiers.length-1].rank;
   for (const tier of rule.tiers) { if (amount >= tier.th) { rankKey = tier.rank; break; } }
-  const label = document.getElementById('b3-type').options[document.getElementById('b3-type').selectedIndex].text;
-  showResult('result-b3', rankKey, amount, label, rule.note||null);
+  showResult('result-b3', rankKey, amount, getLabel('b3'), rule.note||null);
 }
 
 // ===== 支出負担行為 判定 =====
 function judgeSFA() {
-  const typeVal = document.getElementById('sfa-type').value;
+  const typeVal = getKey('sfa');
   const amount  = parseFloat(document.getElementById('sfa-amount').value);
-  if (!typeVal)              { alert('節・区分を選択してください。'); return; }
+  if (!typeVal)               { alert('節・区分を選択してください。'); return; }
   if (isNaN(amount)||amount<0){ alert('金額を正しく入力してください（万円単位）。'); return; }
   const rule = SFA_RULES[typeVal];
   let rankKey = rule.tiers[rule.tiers.length-1].rank;
   for (const tier of rule.tiers) { if (amount >= tier.th) { rankKey = tier.rank; break; } }
-  const label = document.getElementById('sfa-type').options[document.getElementById('sfa-type').selectedIndex].text;
-  showResult('result-sfa', rankKey, amount, label, rule.note||null);
+  showResult('result-sfa', rankKey, amount, getLabel('sfa'), rule.note||null);
 }
 
-// ===== Enterキー対応 =====
+// ===== 初期化・Enterキー対応 =====
+initSecSelects();
 document.getElementById('b2-amount').addEventListener('keydown',  e => { if (e.key==='Enter') judgeB2();  });
 document.getElementById('b3-amount').addEventListener('keydown',  e => { if (e.key==='Enter') judgeB3();  });
 document.getElementById('sfa-amount').addEventListener('keydown', e => { if (e.key==='Enter') judgeSFA(); });
