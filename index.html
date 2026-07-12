@@ -646,18 +646,25 @@ function showResult(setsu, sub, yen, band, role, gougi){
   const overlayBg = document.getElementById('overlayBg');
   vig.style.opacity = 0; dangerEl.classList.remove('on');
 
-  function doReveal(){
+  // 第2幕: 爆発をワンカットでしっかり見せる(暗転の中、火球と煙だけ)
+  function doExplosion(){
+    drum.style.display='none';
+    overlayBg.style.background = '#000';
     const f=document.createElement('div'); f.className='flash';
-    f.style.setProperty('--flashPeak', (.3 + rank*.12).toFixed(2));
+    f.style.setProperty('--flashPeak', (.5 + rank*.09).toFixed(2));
     document.body.appendChild(f);
     setTimeout(()=>f.remove(),500);
     const shakeCls = rank<=2 ? 'shake1' : rank<=4 ? 'shake2' : 'shake3';
     document.body.classList.add(shakeCls);
     setTimeout(()=>document.body.classList.remove(shakeCls),700);
-    boom(0, .5 + rank*.15);            // 全ランク: 爆発音
-    fanfare(rank);
+    boom(0, .5 + rank*.15);
+    explode(rank);
+    if(rank>=4) setTimeout(()=>{ boom(0,.3); explode(Math.max(1,rank-2)); }, 350); // 上位は二次爆発
+  }
 
-    drum.style.display='none';
+  // 第3幕: 煙の中から専決者リビール
+  function doReveal(){
+    fanfare(rank);
     overlayBg.style.background = role.bg;
     document.getElementById('catLine').textContent = setsu.name + " / " + sub.name;
     const amtWord = sub.amt==='change' ? "変更増減額 " : "";
@@ -681,11 +688,11 @@ function showResult(setsu, sub, yen, band, role, gougi){
 
     who.style.animation='none'; void who.offsetWidth; who.style.animation='';
     launchConfetti(role);
-    explode(rank);                     // 全ランク: 爆発エフェクト(ランクで規模逓増)
   }
 
   if(rank < 6){
-    setTimeout(doReveal, suspense);
+    setTimeout(doExplosion, suspense);          // ドラムロール→爆発
+    setTimeout(doReveal, suspense + 1100);      // →たっぷり見せてから登場
     return;
   }
 
@@ -712,9 +719,12 @@ function showResult(setsu, sub, yen, band, role, gougi){
   setTimeout(()=>{
     dangerEl.classList.remove('on');
     overlayBg.classList.remove('dngBg');
+    doExplosion();                              // 隠しボスも大爆発をワンカットで
+  }, suspense + 4400);
+  setTimeout(()=>{
     vig.style.opacity = .55;                    // 赤い気配は残す
     doReveal();
-  }, suspense + 4400);
+  }, suspense + 5700);
 }
 overlay.addEventListener('click', ()=>{
   overlay.classList.remove('show'); stopConfetti();
@@ -729,7 +739,7 @@ const cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
 let parts=[], confettiRun=false, raf;
 function launchConfetti(role){
   cv.width=innerWidth; cv.height=innerHeight;
-  parts=[];
+  parts = parts.filter(p => p.life !== undefined); // 爆発の破片は残し、古い紙吹雪だけ捨てる
   // 紙吹雪の量・星の割合・大砲はランクの二乗で段階的に豪華に
   const rank = role.rank;
   const n = 40 + rank*rank*22;
@@ -771,30 +781,72 @@ function launchConfetti(role){
   confettiRun=true;
   loop();
 }
-let rings=[];
-/* 爆発: 中央からの火花+衝撃波リング(ランクで規模逓増) */
+let rings=[], fires=[], smokes=[];
+/* 本格爆発: 閃光→火球(コア+舌状の炎)→黒煙→破片→衝撃波 */
 function explode(rank){
-  cv.width=cv.width||innerWidth; cv.height=cv.height||innerHeight;
+  if(!cv.width){ cv.width=innerWidth; cv.height=innerHeight; }
   const cx=cv.width/2, cy=cv.height*.42;
+  const scale = .7 + rank*.22;
+
+  // 火球コア(白熱→橙→赤に冷えながら膨張)
+  fires.push({ x:cx, y:cy, r:10, vr:7*scale, life:46, max:46, core:true });
+  // 舌状の炎(コアの周りに不規則に噴き出す)
+  const fn = 14 + rank*6;
+  for(let i=0;i<fn;i++){
+    const a = Math.random()*Math.PI*2;
+    const sp = (2+Math.random()*5)*scale;
+    fires.push({ x:cx, y:cy, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp*.8 - .5,
+      r:8+Math.random()*22*scale, vr:.6, life:34+Math.random()*22, max:56 });
+  }
+  // 黒煙(炎より遅れて湧き、上昇しながら膨らむ)
+  const sn = 12 + rank*5;
+  for(let i=0;i<sn;i++){
+    const a = Math.random()*Math.PI*2;
+    smokes.push({ x:cx+Math.cos(a)*20, y:cy+Math.sin(a)*14,
+      vx:(Math.random()-.5)*1.6, vy:-(.4+Math.random()*1.2),
+      r:10+Math.random()*18*scale, vr:.9+Math.random()*.7,
+      life:70+Math.random()*50, max:120, delay:6+Math.random()*18 });
+  }
+  // 破片(火の粉の尾を引いて飛ぶ)
   const sparkColors = rank>=6
     ? ['#ff2b2b','#ff9a00','#ffd700','#ffffff']
     : ['#ffd700','#ff9a00','#ffffff','#ffe680'];
-  const n = 50 + rank*35;
+  const n = 70 + rank*45;
   for(let i=0;i<n;i++){
     const a = Math.random()*Math.PI*2;
-    const sp = 4 + Math.random()*(8 + rank*2.5);
+    const sp = (5 + Math.random()*11)*scale;
     parts.push({ x:cx, y:cy,
-      vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
-      s:2+Math.random()*4, r:a, vr:0, g:.12,
+      vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 2,
+      s:2+Math.random()*4, r:a, vr:0, g:.16,
       c:sparkColors[Math.floor(Math.random()*sparkColors.length)],
-      shape:'spark', life:40+Math.random()*30 });
+      shape:'spark', life:44+Math.random()*36 });
   }
-  const rn = 1 + Math.ceil(rank/2);
+  // 衝撃波リング
+  const rn = 2 + Math.ceil(rank/2);
   for(let i=0;i<rn;i++){
-    rings.push({ x:cx, y:cy, r:10, vr:9+rank*2.5+i*3, alpha:.9,
+    rings.push({ x:cx, y:cy, r:10, vr:(11+rank*3+i*4)*scale, alpha:.9,
       c: rank>=6 ? '#ff4b2b' : '#ffd700', w:3+rank });
   }
   if(!confettiRun){ confettiRun=true; loop(); }
+}
+function drawFire(f){
+  const p = f.life/f.max;                    // 1→0
+  const heat = f.core ? p : Math.min(1,p*1.3);
+  const grad = ctx.createRadialGradient(f.x,f.y,0, f.x,f.y,f.r);
+  if(heat > .7){       grad.addColorStop(0,'rgba(255,255,240,'+p+')'); grad.addColorStop(.4,'rgba(255,220,80,'+p*.95+')'); grad.addColorStop(1,'rgba(255,120,0,0)'); }
+  else if(heat > .4){  grad.addColorStop(0,'rgba(255,220,120,'+p+')'); grad.addColorStop(.5,'rgba(255,140,20,'+p*.9+')'); grad.addColorStop(1,'rgba(200,40,0,0)'); }
+  else{                grad.addColorStop(0,'rgba(255,120,30,'+p*.9+')'); grad.addColorStop(.6,'rgba(160,30,0,'+p*.7+')'); grad.addColorStop(1,'rgba(60,10,0,0)'); }
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.fill();
+}
+function drawSmoke(s){
+  const p = s.life/s.max;
+  const grad = ctx.createRadialGradient(s.x,s.y,0, s.x,s.y,s.r);
+  grad.addColorStop(0,'rgba(40,36,34,'+(p*.55)+')');
+  grad.addColorStop(.7,'rgba(60,55,52,'+(p*.35)+')');
+  grad.addColorStop(1,'rgba(70,65,62,0)');
+  ctx.fillStyle = grad;
+  ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
 }
 function star(x,y,s,r){
   ctx.beginPath();
@@ -821,6 +873,23 @@ function loop(){
     else ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
     ctx.restore();
   });
+  // 黒煙(炎の下に描く)
+  smokes = smokes.filter(s => s.life > 0);
+  smokes.forEach(s=>{
+    if(s.delay > 0){ s.delay--; return; }
+    s.life--; s.x+=s.vx; s.y+=s.vy; s.r+=s.vr; s.vy-= .01;
+    drawSmoke(s);
+  });
+  // 火球・炎(加算合成で発光させる)
+  fires = fires.filter(f => f.life > 0);
+  ctx.save(); ctx.globalCompositeOperation='lighter';
+  fires.forEach(f=>{
+    f.life--;
+    if(f.vx!==undefined){ f.x+=f.vx; f.y+=f.vy; f.vx*=.94; f.vy*=.94; }
+    f.r += f.vr; if(!f.core) f.vr*=.97;
+    drawFire(f);
+  });
+  ctx.restore();
   rings = rings.filter(r => r.alpha > .02);
   rings.forEach(r=>{
     r.r += r.vr; r.vr *= .96; r.alpha *= .93;
@@ -831,7 +900,7 @@ function loop(){
   });
   raf=requestAnimationFrame(loop);
 }
-function stopConfetti(){ confettiRun=false; cancelAnimationFrame(raf); rings=[]; ctx.clearRect(0,0,cv.width,cv.height); }
+function stopConfetti(){ confettiRun=false; cancelAnimationFrame(raf); rings=[]; fires=[]; smokes=[]; ctx.clearRect(0,0,cv.width,cv.height); }
 addEventListener('resize', ()=>{ cv.width=innerWidth; cv.height=innerHeight; });
 </script>
 </body>
