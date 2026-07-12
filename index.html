@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ 専決区分ジャッジ 〜 一宮市支出負担行為 〜 ⚡</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --gold:#ffd700;
+  }
+  html,body{ height:100%; }
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+    background:#0b0b1a;
+    color:#fff;
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+  /* animated bg */
+  .bg{
+    position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(120,0,255,.25), transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(0,180,255,.2), transparent 50%),
+      #0b0b1a;
+    animation:bgshift 12s ease-in-out infinite alternate;
+  }
+  @keyframes bgshift{ from{filter:hue-rotate(0deg);} to{filter:hue-rotate(60deg);} }
+
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 16px 80px; }
+
+  h1{
+    text-align:center; font-size:clamp(24px,5vw,40px); margin:12px 0 4px;
+    background:linear-gradient(90deg,#ffd700,#ff6ec7,#00e5ff,#ffd700);
+    background-size:300% 100%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:rainbow 4s linear infinite;
+    filter:drop-shadow(0 0 12px rgba(255,215,0,.5));
+  }
+  @keyframes rainbow{ to{background-position:300% 0;} }
+  .sub{ text-align:center; color:#9aa; font-size:13px; margin-bottom:24px; }
+
+  .panel{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:16px; padding:20px; backdrop-filter:blur(8px);
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  label{ display:block; font-weight:bold; margin:14px 0 6px; color:#ffd700; letter-spacing:.05em; }
+  select,input[type=text]{
+    width:100%; padding:14px 16px; font-size:18px; border-radius:10px;
+    border:2px solid rgba(255,255,255,.25); background:#151530; color:#fff;
+    outline:none; transition:.2s;
+  }
+  select:focus,input:focus{ border-color:#ffd700; box-shadow:0 0 16px rgba(255,215,0,.4); }
+  .unit-row{ display:flex; align-items:center; gap:10px; }
+  .unit-row input{ flex:1; text-align:right; font-size:24px; font-weight:bold; letter-spacing:.05em; }
+  .unit{ font-size:20px; font-weight:bold; color:#ffd700; white-space:nowrap; }
+  .quick{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .quick button{
+    padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.08); color:#ccd; cursor:pointer; font-size:13px; transition:.15s;
+  }
+  .quick button:hover{ background:#ffd700; color:#000; transform:scale(1.08); }
+
+  #judgeBtn{
+    display:block; width:100%; margin-top:24px; padding:20px;
+    font-size:26px; font-weight:900; letter-spacing:.2em; color:#1a0a00;
+    background:linear-gradient(180deg,#ffe066,#ffb300);
+    border:none; border-radius:14px; cursor:pointer;
+    box-shadow:0 0 24px rgba(255,180,0,.6), inset 0 -4px 0 rgba(0,0,0,.2);
+    transition:.15s; animation:pulse 1.6s ease-in-out infinite;
+  }
+  #judgeBtn:hover{ transform:scale(1.03); }
+  #judgeBtn:active{ transform:scale(.97); }
+  @keyframes pulse{ 0%,100%{box-shadow:0 0 18px rgba(255,180,0,.5), inset 0 -4px 0 rgba(0,0,0,.2);} 50%{box-shadow:0 0 42px rgba(255,180,0,.95), inset 0 -4px 0 rgba(0,0,0,.2);} }
+
+  /* ============ RESULT OVERLAY ============ */
+  #overlay{
+    position:fixed; inset:0; z-index:100; display:none;
+    align-items:center; justify-content:center; flex-direction:column;
+    overflow:hidden; cursor:pointer;
+  }
+  #overlay.show{ display:flex; }
+  #rays{
+    position:absolute; inset:-50%;
+    background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.14) 0deg 10deg, transparent 10deg 20deg);
+    animation:spin 14s linear infinite;
+  }
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  #overlayBg{ position:absolute; inset:0; transition:background 1s; }
+
+  .drum{ font-size:clamp(30px,7vw,64px); font-weight:900; letter-spacing:.3em; color:#fff;
+    text-shadow:0 0 20px #fff; animation:drumFlash .18s steps(2) infinite; z-index:2; }
+  @keyframes drumFlash{ from{opacity:1;} to{opacity:.25;} }
+
+  #resultBox{ position:relative; z-index:2; text-align:center; padding:20px; max-width:92vw; }
+  #catLine{ font-size:clamp(15px,3vw,22px); color:#fff; opacity:.9; margin-bottom:8px;
+    text-shadow:0 2px 6px rgba(0,0,0,.6); }
+  #amtLine{ font-size:clamp(20px,4vw,32px); font-weight:bold; color:#fff; margin-bottom:16px;
+    text-shadow:0 2px 8px rgba(0,0,0,.6); }
+  #whoTitle{ font-size:clamp(16px,3vw,24px); letter-spacing:.4em; color:#fff; opacity:.85; margin-bottom:4px; }
+  #who{
+    font-size:clamp(64px,16vw,170px); font-weight:900; line-height:1.1;
+    animation:slam .55s cubic-bezier(.2,2.2,.4,1) both;
+    text-shadow:0 0 30px currentColor, 0 6px 0 rgba(0,0,0,.35);
+  }
+  @keyframes slam{
+    0%{ transform:scale(6) rotate(-14deg); opacity:0; filter:blur(12px); }
+    70%{ transform:scale(.92) rotate(2deg); opacity:1; filter:blur(0); }
+    100%{ transform:scale(1) rotate(0); }
+  }
+  .megaGlow{ animation:slam .55s cubic-bezier(.2,2.2,.4,1) both, glowPulse 1.2s ease-in-out .6s infinite alternate !important; }
+  @keyframes glowPulse{ from{ text-shadow:0 0 25px currentColor,0 6px 0 rgba(0,0,0,.35);} to{ text-shadow:0 0 70px currentColor,0 0 120px currentColor,0 6px 0 rgba(0,0,0,.35);} }
+  .rainbowWho{
+    background:linear-gradient(90deg,#ff004c,#ff9a00,#ffe600,#00e56a,#00cfff,#8a5cff,#ff004c);
+    background-size:400% 100%; -webkit-background-clip:text; background-clip:text; color:transparent !important;
+    animation:slam .55s cubic-bezier(.2,2.2,.4,1) both, rainbow 2s linear infinite !important;
+    filter:drop-shadow(0 0 30px #ffd700);
+  }
+  #stamp{
+    display:inline-block; margin-top:14px; padding:6px 22px;
+    border:4px solid currentColor; border-radius:8px;
+    font-size:clamp(18px,4vw,30px); font-weight:900; letter-spacing:.3em;
+    transform:rotate(-6deg); animation:stampIn .4s .5s cubic-bezier(.2,3,.4,1) both;
+  }
+  @keyframes stampIn{ from{ transform:scale(3) rotate(-30deg); opacity:0; } to{ transform:scale(1) rotate(-6deg); opacity:1; } }
+  #gougi{
+    margin-top:20px; font-size:clamp(14px,2.6vw,19px); color:#fff;
+    background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.3);
+    border-radius:12px; padding:12px 18px; display:inline-block; text-align:left;
+    animation:fadeUp .5s .9s both;
+  }
+  #basis{
+    margin-top:12px; font-size:12.5px; color:#cdd; opacity:.9;
+    background:rgba(0,0,0,.35); border-radius:10px; padding:10px 14px;
+    display:inline-block; max-width:640px; text-align:left; animation:fadeUp .5s 1.1s both;
+  }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;} }
+  #closeHint{ position:absolute; bottom:18px; width:100%; text-align:center; color:#fff;
+    opacity:.7; font-size:13px; z-index:2; animation:fadeUp .5s 1.4s both; }
+
+  #confetti{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+  .shake{ animation:shake .5s linear both; }
+  @keyframes shake{
+    10%{transform:translate(-8px,4px);} 20%{transform:translate(9px,-6px);}
+    30%{transform:translate(-10px,-4px);} 40%{transform:translate(8px,6px);}
+    50%{transform:translate(-6px,3px);} 60%{transform:translate(6px,-3px);}
+    70%{transform:translate(-4px,2px);} 80%{transform:translate(3px,-2px);}
+    90%{transform:translate(-2px,1px);} 100%{transform:none;}
+  }
+  .flash{ position:fixed; inset:0; background:#fff; z-index:99; pointer-events:none; animation:flashOut .45s ease-out both; }
+  @keyframes flashOut{ from{opacity:1;} to{opacity:0;} }
+
+  .note{ margin-top:22px; font-size:12px; color:#889; line-height:1.7; }
+  table.bands{ width:100%; margin-top:10px; border-collapse:collapse; font-size:13px; }
+  table.bands td,table.bands th{ border:1px solid rgba(255,255,255,.2); padding:6px 8px; text-align:left; }
+  table.bands th{ background:rgba(255,215,0,.12); color:#ffd700; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <h1>⚡ 専決区分ジャッジ ⚡</h1>
+  <div class="sub">一宮市「予算の編成及び執行に関する規則」別表第1(支出負担行為専決区分)準拠 — 節と金額を入れて運命の審判を受けよ</div>
+
+  <div class="panel">
+    <label>節・区分をえらぶ</label>
+    <select id="cat"></select>
+
+    <label>金額を入力(円)</label>
+    <div class="unit-row">
+      <input type="text" id="amt" inputmode="numeric" placeholder="例: 1,200,000" autocomplete="off">
+      <span class="unit">円</span>
+    </div>
+    <div class="quick">
+      <button data-v="50000">5万</button>
+      <button data-v="100000">10万</button>
+      <button data-v="500000">50万</button>
+      <button data-v="1000000">100万</button>
+      <button data-v="5000000">500万</button>
+      <button data-v="10000000">1,000万</button>
+      <button data-v="15000000">1,500万</button>
+      <button data-v="30000000">3,000万</button>
+      <button data-v="50000000">5,000万</button>
+      <button data-v="100000000">1億</button>
+    </div>
+
+    <button id="judgeBtn">⚔ 審 判 ⚔</button>
+
+    <div id="bandPreview"></div>
+
+    <div class="note">
+      ※ 一宮市「予算の編成及び執行に関する規則」別表第1(第28条・第29条・第31条関係)に基づく支出負担行為の専決区分です。金額の境界は「以上/未満」(単位:万円)。<br>
+      ※ 合議先「財務部」は、副市長専決→財務部長、部長等専決→財務部次長、部等の次長等専決→財政課長の合議(備考3)。<br>
+      ※ 継続費・繰越等の特例(備考4以降)、変更契約(備考9)などの個別事情は原文をご確認ください。
+    </div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div id="overlay">
+  <div id="overlayBg"></div>
+  <div id="rays"></div>
+  <div class="drum" id="drum">審 議 中 ……</div>
+  <div id="resultBox" style="display:none;">
+    <div id="catLine"></div>
+    <div id="amtLine"></div>
+    <div id="whoTitle">✦ こ の 専 決 区 分 は ✦</div>
+    <div id="who"></div>
+    <div><span id="stamp">専 決</span></div>
+    <div><span id="gougi"></span></div>
+    <div><span id="basis"></span></div>
+  </div>
+  <canvas id="confetti"></canvas>
+  <div id="closeHint">タップ / クリックで戻る</div>
+</div>
+
+<script>
+/* =========================================================
+   専決区分データ
+   出典: 一宮市 予算の編成及び執行に関する規則 別表第1
+        (単位: 万円 / 「以上」「未満」)
+   role: 専任=専任課長等, 課=課長等, 次=部等の次長等,
+         部=部長等, 副=副市長, 市=市長(専決欄に定めなし=市長決裁)
+========================================================= */
+const ROLES = {
+  "専任": { name:"専任課長等", color:"#7CFC98", bg:"radial-gradient(circle at 50% 40%, #0b3d1e, #04140a)", rank:1 },
+  "課":   { name:"課長等",     color:"#4FC3F7", bg:"radial-gradient(circle at 50% 40%, #0a2d4d, #040d18)", rank:2 },
+  "次":   { name:"部等の次長等", color:"#CE93D8", bg:"radial-gradient(circle at 50% 40%, #3a1054, #120420)", rank:3 },
+  "部":   { name:"部長等",     color:"#FFB74D", bg:"radial-gradient(circle at 50% 40%, #5a2d00, #1c0e00)", rank:4 },
+  "副":   { name:"副市長",     color:"#FF5252", bg:"radial-gradient(circle at 50% 40%, #5c0a0a, #1c0202)", rank:5 },
+  "市":   { name:"市 長",      color:"#FFD700", bg:"radial-gradient(circle at 50% 40%, #4d3800, #191002)", rank:6 },
+};
+
+// bands: 金額の小さい順。min以上 max未満 (万円)。max:null = 上限なし
+const CATS = [
+  { id:"1", name:"1 報酬(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"なし(会計年度任用職員報酬は人事課長合議)" },
+  { id:"2", name:"2 給料", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
+  { id:"3", name:"3 職員手当等(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
+  { id:"4", name:"4 共済費(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
+  { id:"5", name:"5 災害補償費(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
+  { id:"6", name:"6 恩給及び退職年金", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
+  { id:"7", name:"7 報償費(下記以外)", bands:[{min:0,max:50,role:"課"},{min:50,max:100,role:"次"},{min:100,max:null,role:"部"}], gougi:"100万円以上は財政課長" },
+  { id:"8a", name:"8 旅費(宿泊を伴う旅行)", bands:[{min:0,max:10,role:"課"},{min:10,max:15,role:"次"},{min:15,max:null,role:"部"}], gougi:"財政課長" },
+  { id:"8b", name:"8 旅費(日帰り旅行)", bands:[{min:0,max:1,role:"専任"},{min:1,max:null,role:"課"}], gougi:"なし" },
+  { id:"9", name:"9 交際費", bands:[{min:0,max:10,role:"副"},{min:10,max:null,role:"市"}], gougi:"財政課長(議会のものは全額議会局長専決・備考13)" },
+  { id:"10a", name:"10 需用費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"500万円以上は財政課長/消防を除く自動車関係は資産経営課長(5万円未満は資産経営課専任課長)" },
+  { id:"10b", name:"10 需用費(光熱水費)", bands:[{min:0,max:5,role:"専任"},{min:5,max:null,role:"課"}], gougi:"なし(公共料金システム分は全額会計課長専決)" },
+  { id:"10c", name:"10 需用費(飲食料費)", bands:[{min:0,max:10,role:"課"},{min:10,max:30,role:"次"},{min:30,max:50,role:"部"},{min:50,max:null,role:"副"}], gougi:"接待用は財政課長(接待用は施行伺により副市長決裁+財務部長・財務部次長・財政課長合議 — 備考1)" },
+  { id:"10d", name:"10 需用費(物品を除く修繕料)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"130万円超は技術関係担当課長(緊急応急工事を除く)+財務部", fzb:true },
+  { id:"11", name:"11 役務費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"500万円以上は財政課長/火災・自動車関係保険料は資産経営課長(5万円未満は資産経営課専任課長)" },
+  { id:"12a", name:"12 委託料(下記以外)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { id:"12b", name:"12 委託料(測量・調査・設計・監理等)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"50万円超は技術関係担当課長+財務部", fzb:true },
+  { id:"13", name:"13 使用料及び賃借料(下記以外)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/不動産関係は資産経営課長", fzb:true },
+  { id:"14", name:"14 工事請負費(下記以外)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"技術関係担当課長+財務部", fzb:true },
+  { id:"15", name:"15 原材料費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:300,role:"課"},{min:300,max:null,role:"次"}], gougi:"なし" },
+  { id:"16a", name:"16 公有財産購入費(下記以外)", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/100万円以上は財務部", fzb:true },
+  { id:"16b", name:"16 公有財産購入費(公共事業用地)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/道水路用地を除く用地取得は資産経営課長", fzb:true },
+  { id:"17", name:"17 備品購入費", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/消防を除く自動車関係は資産経営課長", fzb:true },
+  { id:"18", name:"18 負担金、補助及び交付金(下記以外)", bands:[{min:0,max:50,role:"課"},{min:50,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { id:"19", name:"19 扶助費", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+  { id:"20", name:"20 貸付金", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/債権は資産経営課長" },
+  { id:"21a", name:"21 補償金・補填金(下記以外)", bands:[{min:0,max:1500,role:"副"},{min:1500,max:null,role:"市"}], gougi:"財政課長" },
+  { id:"21b", name:"21 公共事業の施行に伴う移転補償", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { id:"21c", name:"21 賠償金", bands:[{min:0,max:null,role:"副"}], gougi:"財政課長/道水路関係を除く車両・不動産関係は資産経営課長" },
+  { id:"22", name:"22 償還金、利子及び割引料(下記以外)", bands:[{min:0,max:10,role:"次"},{min:10,max:null,role:"部"}], gougi:"10万円以上は財政課長" },
+  { id:"23", name:"23 投資及び出資金", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/公有財産は資産経営課長" },
+  { id:"24", name:"24 積立金", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/10万円以上は財政課長" },
+  { id:"25", name:"25 寄附金", bands:[{min:0,max:null,role:"市"}], gougi:"財政課長" },
+  { id:"26", name:"26 公課費", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+  { id:"27", name:"27 繰出金", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長" },
+];
+
+/* ------- UI setup ------- */
+const catSel = document.getElementById('cat');
+CATS.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=c.name; catSel.appendChild(o); });
+catSel.value = CATS.findIndex(c=>c.id==="14"); // 工事請負費を初期表示
+
+const amt = document.getElementById('amt');
+amt.addEventListener('input', ()=> {
+  const d = amt.value.replace(/[^0-9]/g,'');
+  amt.value = d ? Number(d).toLocaleString('ja-JP') : '';
+});
+document.querySelectorAll('.quick button').forEach(b=>{
+  b.addEventListener('click', ()=>{ amt.value = Number(b.dataset.v).toLocaleString('ja-JP'); });
+});
+
+function fmtMan(man){
+  if(man>=10000 && man%10000===0) return (man/10000)+"億円";
+  return man.toLocaleString('ja-JP')+"万円";
+}
+function bandLabel(b){
+  if(b.min===0 && b.max===null) return "全額";
+  if(b.min===0) return fmtMan(b.max)+"未満";
+  if(b.max===null) return fmtMan(b.min)+"以上";
+  return fmtMan(b.min)+"以上 "+fmtMan(b.max)+"未満";
+}
+function renderPreview(){
+  const c = CATS[catSel.value];
+  let h = '<table class="bands"><tr><th>金額(万円)</th><th>専決者</th></tr>';
+  c.bands.forEach(b=>{ h+=`<tr><td>${bandLabel(b)}</td><td style="color:${ROLES[b.role].color};font-weight:bold;">${ROLES[b.role].name}</td></tr>`; });
+  h += `</table><div class="note" style="margin-top:6px;">合議先: ${c.gougi}</div>`;
+  document.getElementById('bandPreview').innerHTML = h;
+}
+catSel.addEventListener('change', renderPreview);
+renderPreview();
+
+/* ------- judge ------- */
+function judge(){
+  const yen = Number(amt.value.replace(/[^0-9]/g,''));
+  if(!yen){ amt.focus(); amt.style.borderColor='#ff5252'; setTimeout(()=>amt.style.borderColor='',600); return; }
+  const man = yen/10000;
+  const c = CATS[catSel.value];
+  const band = c.bands.find(b => man>=b.min && (b.max===null || man<b.max));
+  const role = ROLES[band.role];
+  let gougi = c.gougi;
+  if(c.fzb && /財務部/.test(gougi)){
+    const map = { "副":"財務部長", "部":"財務部次長", "次":"財政課長" };
+    if(map[band.role]) gougi += `\n→ 備考3により今回の合議先は「${map[band.role]}」`;
+  }
+  showResult(c, yen, band, role, gougi);
+}
+document.getElementById('judgeBtn').addEventListener('click', judge);
+amt.addEventListener('keydown', e=>{ if(e.key==='Enter') judge(); });
+
+/* ------- flashy overlay ------- */
+const overlay = document.getElementById('overlay');
+const drum = document.getElementById('drum');
+const resultBox = document.getElementById('resultBox');
+let audioCtx;
+
+function beep(freq, t0, dur, type='square', gain=.12){
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(gain, audioCtx.currentTime+t0);
+  g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+t0+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(audioCtx.currentTime+t0); o.stop(audioCtx.currentTime+t0+dur+.05);
+}
+function drumroll(sec){
+  for(let t=0;t<sec;t+=.07) beep(80+Math.random()*40, t, .05, 'triangle', .1);
+}
+function fanfare(rank){
+  const base=[523,659,784,1047];
+  base.forEach((f,i)=>beep(f, .0+i*.09, .5, 'square', .09));
+  beep(1319,.4,.8,'square',.1);
+  if(rank>=5){ [1568,1760,2093].forEach((f,i)=>beep(f,.6+i*.1,.9,'sawtooth',.07)); }
+}
+
+function showResult(c, yen, band, role, gougi){
+  audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+  overlay.classList.add('show');
+  resultBox.style.display='none';
+  drum.style.display='block';
+  document.getElementById('overlayBg').style.background = "radial-gradient(circle at 50% 40%, #222, #000)";
+  const suspense = 1400 + role.rank*180;
+  drumroll(suspense/1000);
+
+  setTimeout(()=>{
+    // flash + shake
+    const f=document.createElement('div'); f.className='flash'; document.body.appendChild(f);
+    setTimeout(()=>f.remove(),500);
+    document.body.classList.add('shake');
+    setTimeout(()=>document.body.classList.remove('shake'),550);
+    fanfare(role.rank);
+
+    drum.style.display='none';
+    document.getElementById('overlayBg').style.background = role.bg;
+    document.getElementById('catLine').textContent = c.name;
+    document.getElementById('amtLine').textContent = yen.toLocaleString('ja-JP')+" 円("+(yen/10000).toLocaleString('ja-JP')+"万円)";
+    const who = document.getElementById('who');
+    who.textContent = role.name;
+    who.style.color = role.color;
+    who.className = role.rank>=6 ? 'rainbowWho' : 'megaGlow';
+    const stamp = document.getElementById('stamp');
+    stamp.style.color = role.color;
+    stamp.textContent = band.role==="市" ? "市 長 決 裁" : "専 決";
+    document.getElementById('gougi').innerHTML =
+      "🤝 <b>合議先:</b> " + gougi.replace(/\n/g,'<br>');
+    document.getElementById('basis').innerHTML =
+      "📜 <b>根拠:</b> 一宮市 予算の編成及び執行に関する規則 別表第1「"+c.name+"」該当区分: <b>"+bandLabel(band)+"</b> → "+role.name+
+      (band.role==="市" ? "(別表第1に専決の定めがない区分のため市長決裁)" : "");
+    resultBox.style.display='block';
+
+    // 演出リスタート
+    who.style.animation='none'; void who.offsetWidth; who.style.animation='';
+    launchConfetti(role);
+  }, suspense);
+}
+overlay.addEventListener('click', ()=>{ overlay.classList.remove('show'); stopConfetti(); });
+
+/* ------- confetti ------- */
+const cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
+let parts=[], confettiRun=false, raf;
+function launchConfetti(role){
+  cv.width=innerWidth; cv.height=innerHeight;
+  parts=[];
+  const n = 120 + role.rank*80;
+  const colors = role.rank>=6
+    ? ['#ff004c','#ff9a00','#ffe600','#00e56a','#00cfff','#8a5cff','#ffd700','#fff']
+    : [role.color,'#ffffff','#ffd700', role.color];
+  for(let i=0;i<n;i++){
+    parts.push({
+      x: Math.random()*cv.width,
+      y: -20-Math.random()*cv.height*.5,
+      vx:(Math.random()-.5)*4,
+      vy:2+Math.random()*5,
+      s:5+Math.random()*9,
+      r:Math.random()*Math.PI,
+      vr:(Math.random()-.5)*.3,
+      c:colors[Math.floor(Math.random()*colors.length)],
+      shape: Math.random()<.25 ? 'star':'rect'
+    });
+  }
+  // side cannons for top ranks
+  if(role.rank>=5){
+    for(let i=0;i<120;i++){
+      const left = i%2===0;
+      parts.push({ x:left?0:cv.width, y:cv.height*.7,
+        vx:(left?1:-1)*(4+Math.random()*9), vy:-(6+Math.random()*9),
+        s:6+Math.random()*8, r:Math.random()*Math.PI, vr:(Math.random()-.5)*.4,
+        c:colors[Math.floor(Math.random()*colors.length)], shape:'rect', g:.25 });
+    }
+  }
+  confettiRun=true;
+  loop();
+}
+function star(x,y,s,r){
+  ctx.beginPath();
+  for(let i=0;i<10;i++){
+    const a=r+i*Math.PI/5, rad=i%2===0?s:s/2;
+    ctx[i===0?'moveTo':'lineTo'](x+Math.cos(a)*rad, y+Math.sin(a)*rad);
+  }
+  ctx.closePath(); ctx.fill();
+}
+function loop(){
+  if(!confettiRun) return;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=(p.g||.06); p.r+=p.vr;
+    if(p.y>cv.height+30){ p.y=-20; p.vy=2+Math.random()*5; }
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c;
+    if(p.shape==='star') star(0,0,p.s,0);
+    else ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+    ctx.restore();
+  });
+  raf=requestAnimationFrame(loop);
+}
+function stopConfetti(){ confettiRun=false; cancelAnimationFrame(raf); ctx.clearRect(0,0,cv.width,cv.height); }
+addEventListener('resize', ()=>{ cv.width=innerWidth; cv.height=innerHeight; });
+</script>
+</body>
+</html>
