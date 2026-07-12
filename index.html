@@ -134,6 +134,40 @@
     opacity:.7; font-size:13px; z-index:2; animation:fadeUp .5s 1.4s both; }
 
   #confetti{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+
+  /* ====== 市長=隠しボス「超危険デンジャラスゾーン」演出 ====== */
+  #vig{ position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0;
+    background:radial-gradient(ellipse at center, transparent 40%, rgba(180,0,0,.75) 100%);
+    transition:opacity .25s; }
+  #danger{ position:absolute; inset:0; z-index:5; display:none; pointer-events:none;
+    align-items:center; justify-content:center; flex-direction:column; }
+  #danger.on{ display:flex; }
+  .hazard{ position:absolute; left:0; right:0; height:56px;
+    background:repeating-linear-gradient(45deg,#111 0 22px,#f5c400 22px 44px);
+    box-shadow:0 0 24px rgba(0,0,0,.8); }
+  .hazard.top{ top:0; } .hazard.bottom{ bottom:0; }
+  #dngText{
+    font-size:clamp(28px,7vw,72px); font-weight:900; letter-spacing:.15em;
+    color:#ff2b2b; text-align:center; line-height:1.3;
+    text-shadow:0 0 18px #f00, 0 0 60px #f00;
+    animation:dngFlash .22s steps(2) infinite;
+  }
+  #dngSub{
+    margin-top:14px; font-size:clamp(14px,3vw,24px); font-weight:bold; color:#ffd0d0;
+    letter-spacing:.2em; text-shadow:0 0 10px #f00;
+    animation:dngFlash .44s steps(2) infinite;
+  }
+  @keyframes dngFlash{ from{opacity:1;} to{opacity:.15;} }
+  .dngBg{ background:#1a0000 !important; }
+  /* 市長リビール時: グリッチ気味の震え */
+  .dread{ animation:dread 2.4s ease-in-out .6s infinite !important; }
+  @keyframes dread{
+    0%,100%{ transform:none; filter:none; }
+    47%{ transform:none; }
+    48%{ transform:translate(3px,-2px) skewX(2deg); filter:hue-rotate(80deg); }
+    50%{ transform:translate(-3px,2px) skewX(-2deg); filter:none; }
+    52%{ transform:none; }
+  }
   /* 職位ランクで揺れの激しさが段階的にアップ */
   .shake1{ animation:shakeS .35s linear both; }
   .shake2{ animation:shakeM .5s linear both; }
@@ -228,6 +262,13 @@
     <div><span id="basis"></span></div>
   </div>
   <canvas id="confetti"></canvas>
+  <div id="vig"></div>
+  <div id="danger">
+    <div class="hazard top"></div>
+    <div id="dngText">⚠ 警 告 ⚠<br>超危険デンジャラスゾーン</div>
+    <div id="dngSub">― 危険 × デンジャラス = 危険度2倍 ―<br>専決不能。真の決裁者が接近中……</div>
+    <div class="hazard bottom"></div>
+  </div>
   <div id="closeHint">タップ / クリックで戻る</div>
 </div>
 
@@ -247,7 +288,7 @@ const ROLES = {
   "次":   { name:"部等の次長等", color:"#CE93D8", bg:"radial-gradient(circle at 50% 40%, #3a1054, #120420)", rank:3 },
   "部":   { name:"部長等",     color:"#FFB74D", bg:"radial-gradient(circle at 50% 40%, #5a2d00, #1c0e00)", rank:4 },
   "副":   { name:"副市長",     color:"#FF5252", bg:"radial-gradient(circle at 50% 40%, #5c0a0a, #1c0202)", rank:5 },
-  "市":   { name:"市 長",      color:"#FFD700", bg:"radial-gradient(circle at 50% 40%, #4d3800, #191002)", rank:6 },
+  "市":   { name:"市 長",      color:"#FFD700", bg:"radial-gradient(circle at 50% 40%, #3d0505, #0a0000)", rank:6 },
 };
 
 // bands: 金額の小さい順。min以上 max未満 (万円)。max:null = 上限なし
@@ -490,6 +531,75 @@ function snare(t0, gain){
   o.connect(og); og.connect(audioCtx.destination);
   o.start(t); o.stop(t+.08);
 }
+// 爆発音: ローパスノイズの轟音+サブベースの落下
+function boom(t0, power){
+  if(!soundOn) return;
+  const t = audioCtx.currentTime + t0;
+  const src = audioCtx.createBufferSource(); src.buffer = getNoiseBuf();
+  src.loop = true;
+  const lp = audioCtx.createBiquadFilter(); lp.type='lowpass';
+  lp.frequency.setValueAtTime(900, t);
+  lp.frequency.exponentialRampToValueAtTime(80, t+.6);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(.5*power, t);
+  g.gain.exponentialRampToValueAtTime(.001, t+.7);
+  src.connect(lp); lp.connect(g); g.connect(audioCtx.destination);
+  src.start(t); src.stop(t+.75);
+  const o = audioCtx.createOscillator(); o.type='sine';
+  o.frequency.setValueAtTime(90, t);
+  o.frequency.exponentialRampToValueAtTime(28, t+.55);
+  const og = audioCtx.createGain();
+  og.gain.setValueAtTime(.5*power, t);
+  og.gain.exponentialRampToValueAtTime(.001, t+.6);
+  o.connect(og); og.connect(audioCtx.destination);
+  o.start(t); o.stop(t+.65);
+}
+// 心臓音: ドッ・ドッ(市長戦のヒヤッと用)
+function heartbeat(t0){
+  if(!soundOn) return;
+  [0,.22].forEach((d,i)=>{
+    const t = audioCtx.currentTime + t0 + d;
+    const o = audioCtx.createOscillator(); o.type='sine';
+    o.frequency.setValueAtTime(52, t);
+    o.frequency.exponentialRampToValueAtTime(38, t+.12);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(i===0?.55:.4, t);
+    g.gain.exponentialRampToValueAtTime(.001, t+.16);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+.2);
+  });
+}
+// 警報サイレン(2音交互)
+function klaxon(t0, dur){
+  if(!soundOn) return;
+  for(let d=0; d<dur; d+=.36){
+    [0,.18].forEach((dd,i)=>{
+      const t = audioCtx.currentTime + t0 + d + dd;
+      const o = audioCtx.createOscillator(); o.type='sawtooth';
+      o.frequency.value = i===0 ? 620 : 440;
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(.12, t);
+      g.gain.setValueAtTime(.12, t+.15);
+      g.gain.exponentialRampToValueAtTime(.001, t+.18);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t+.2);
+    });
+  }
+}
+// 不協和音スティング(ヒヤッ)
+function sting(t0){
+  if(!soundOn) return;
+  [660,699,988].forEach(f=>{
+    const t = audioCtx.currentTime + t0;
+    const o = audioCtx.createOscillator(); o.type='sawtooth'; o.frequency.value=f;
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(.001, t);
+    g.gain.exponentialRampToValueAtTime(.09, t+.5);
+    g.gain.exponentialRampToValueAtTime(.001, t+1.4);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+1.5);
+  });
+}
 // ドラムロール: 序盤から刻み、終盤に向けて加速+クレッシェンド
 function drumroll(sec, rank){
   const baseGain = .25 + rank*.06;
@@ -531,7 +641,12 @@ function showResult(setsu, sub, yen, band, role, gougi){
   rays.style.animationDuration = (18 - rank*2)+'s';
   drumroll(suspense/1000, rank);
 
-  setTimeout(()=>{
+  const vig = document.getElementById('vig');
+  const dangerEl = document.getElementById('danger');
+  const overlayBg = document.getElementById('overlayBg');
+  vig.style.opacity = 0; dangerEl.classList.remove('on');
+
+  function doReveal(){
     const f=document.createElement('div'); f.className='flash';
     f.style.setProperty('--flashPeak', (.3 + rank*.12).toFixed(2));
     document.body.appendChild(f);
@@ -539,17 +654,20 @@ function showResult(setsu, sub, yen, band, role, gougi){
     const shakeCls = rank<=2 ? 'shake1' : rank<=4 ? 'shake2' : 'shake3';
     document.body.classList.add(shakeCls);
     setTimeout(()=>document.body.classList.remove(shakeCls),700);
+    boom(0, .5 + rank*.15);            // 全ランク: 爆発音
     fanfare(rank);
 
     drum.style.display='none';
-    document.getElementById('overlayBg').style.background = role.bg;
+    overlayBg.style.background = role.bg;
     document.getElementById('catLine').textContent = setsu.name + " / " + sub.name;
     const amtWord = sub.amt==='change' ? "変更増減額 " : "";
     document.getElementById('amtLine').textContent = amtWord + yen.toLocaleString('ja-JP')+" 円("+(yen/10000).toLocaleString('ja-JP')+"万円)";
     const who = document.getElementById('who');
     who.textContent = role.name + ((band.role==='課' && sub.who) ? "("+sub.who+")" : "");
     who.style.color = role.color;
-    who.className = role.rank>=6 ? 'rainbowWho' : 'megaGlow';
+    who.className = rank>=6 ? 'rainbowWho dread' : 'megaGlow';
+    document.getElementById('whoTitle').textContent =
+      rank>=6 ? '✦ 真 の 決 裁 者 ✦' : '✦ こ の 専 決 区 分 は ✦';
     const stamp = document.getElementById('stamp');
     stamp.style.color = role.color;
     stamp.textContent = band.role==="市" ? "市 長 決 裁" : "専 決";
@@ -557,15 +675,54 @@ function showResult(setsu, sub, yen, band, role, gougi){
       "🤝 <b>合議先:</b> " + gougi.replace(/\n/g,'<br>');
     document.getElementById('basis').innerHTML =
       "📜 <b>根拠:</b> 一宮市 予算の編成及び執行に関する規則 別表第1「"+setsu.name+"」/「"+sub.name+"」該当区分: <b>"+bandLabel(band)+"</b> → "+role.name+
-      (band.role==="市" ? "(別表第1に専決の定めがない区分のため市長決裁)" : "") +
+      (band.role==="市" ? "(別表第1に専決の定めがない区分のため市長決裁 — 隠しルート到達)" : "") +
       (sub.note ? "<br>⚠ "+sub.note : "");
     resultBox.style.display='block';
 
     who.style.animation='none'; void who.offsetWidth; who.style.animation='';
     launchConfetti(role);
+    explode(rank);                     // 全ランク: 爆発エフェクト(ランクで規模逓増)
+  }
+
+  if(rank < 6){
+    setTimeout(doReveal, suspense);
+    return;
+  }
+
+  /* ===== 市長 = 隠しボスルート =====
+     ドラムロール → 突然の静寂と暗転 → 心臓音 → 警報+デンジャラスゾーン → 大爆発リビール */
+  setTimeout(()=>{
+    drum.style.display='none';
+    overlayBg.style.background = '#000';       // 静寂と暗転(ヒヤッ)
+    vig.style.opacity = 1;
+    heartbeat(0); heartbeat(.9); heartbeat(1.8);
+    sting(.3);
+    [0,.9,1.8].forEach(d=>{
+      setTimeout(()=>{ vig.style.opacity=1; }, d*1000);
+      setTimeout(()=>{ vig.style.opacity=.35; }, d*1000+300);
+    });
   }, suspense);
+  setTimeout(()=>{
+    dangerEl.classList.add('on');
+    overlayBg.classList.add('dngBg');
+    klaxon(0, 2.0);
+    document.body.classList.add('shake2');
+    setTimeout(()=>document.body.classList.remove('shake2'),700);
+  }, suspense + 2300);
+  setTimeout(()=>{
+    dangerEl.classList.remove('on');
+    overlayBg.classList.remove('dngBg');
+    vig.style.opacity = .55;                    // 赤い気配は残す
+    doReveal();
+  }, suspense + 4400);
 }
-overlay.addEventListener('click', ()=>{ overlay.classList.remove('show'); stopConfetti(); });
+overlay.addEventListener('click', ()=>{
+  overlay.classList.remove('show'); stopConfetti();
+  document.getElementById('vig').style.opacity = 0;
+  document.getElementById('danger').classList.remove('on');
+  document.getElementById('overlayBg').classList.remove('dngBg');
+  document.getElementById('whoTitle').textContent = '✦ こ の 専 決 区 分 は ✦';
+});
 
 /* ------- confetti ------- */
 const cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
@@ -614,6 +771,31 @@ function launchConfetti(role){
   confettiRun=true;
   loop();
 }
+let rings=[];
+/* 爆発: 中央からの火花+衝撃波リング(ランクで規模逓増) */
+function explode(rank){
+  cv.width=cv.width||innerWidth; cv.height=cv.height||innerHeight;
+  const cx=cv.width/2, cy=cv.height*.42;
+  const sparkColors = rank>=6
+    ? ['#ff2b2b','#ff9a00','#ffd700','#ffffff']
+    : ['#ffd700','#ff9a00','#ffffff','#ffe680'];
+  const n = 50 + rank*35;
+  for(let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2;
+    const sp = 4 + Math.random()*(8 + rank*2.5);
+    parts.push({ x:cx, y:cy,
+      vx:Math.cos(a)*sp, vy:Math.sin(a)*sp,
+      s:2+Math.random()*4, r:a, vr:0, g:.12,
+      c:sparkColors[Math.floor(Math.random()*sparkColors.length)],
+      shape:'spark', life:40+Math.random()*30 });
+  }
+  const rn = 1 + Math.ceil(rank/2);
+  for(let i=0;i<rn;i++){
+    rings.push({ x:cx, y:cy, r:10, vr:9+rank*2.5+i*3, alpha:.9,
+      c: rank>=6 ? '#ff4b2b' : '#ffd700', w:3+rank });
+  }
+  if(!confettiRun){ confettiRun=true; loop(); }
+}
 function star(x,y,s,r){
   ctx.beginPath();
   for(let i=0;i<10;i++){
@@ -625,17 +807,31 @@ function star(x,y,s,r){
 function loop(){
   if(!confettiRun) return;
   ctx.clearRect(0,0,cv.width,cv.height);
+  parts = parts.filter(p => p.life===undefined || --p.life > 0);
   parts.forEach(p=>{
     p.x+=p.vx; p.y+=p.vy; p.vy+=(p.g||.06); p.r+=p.vr;
-    if(p.y>cv.height+30){ p.y=-20; p.vy=2+Math.random()*5; }
+    if(p.life===undefined && p.y>cv.height+30){ p.y=-20; p.vy=2+Math.random()*5; }
     ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c;
     if(p.shape==='star') star(0,0,p.s,0);
+    else if(p.shape==='spark'){
+      ctx.globalAlpha = Math.min(1, (p.life||30)/30);
+      ctx.rotate(Math.atan2(p.vy,p.vx));
+      ctx.fillRect(-p.s*2, -p.s/2, p.s*4, p.s); // 進行方向に伸びる火花
+    }
     else ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);
+    ctx.restore();
+  });
+  rings = rings.filter(r => r.alpha > .02);
+  rings.forEach(r=>{
+    r.r += r.vr; r.vr *= .96; r.alpha *= .93;
+    ctx.save();
+    ctx.globalAlpha = r.alpha; ctx.strokeStyle = r.c; ctx.lineWidth = r.w;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI*2); ctx.stroke();
     ctx.restore();
   });
   raf=requestAnimationFrame(loop);
 }
-function stopConfetti(){ confettiRun=false; cancelAnimationFrame(raf); ctx.clearRect(0,0,cv.width,cv.height); }
+function stopConfetti(){ confettiRun=false; cancelAnimationFrame(raf); rings=[]; ctx.clearRect(0,0,cv.width,cv.height); }
 addEventListener('resize', ()=>{ cv.width=innerWidth; cv.height=innerHeight; });
 </script>
 </body>
