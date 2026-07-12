@@ -198,6 +198,9 @@
     </div>
 
     <button id="judgeBtn">⚔ 審 判 ⚔</button>
+    <div style="text-align:right; margin-top:10px;">
+      <button id="sndBtn" style="padding:6px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.08); color:#ccd; cursor:pointer; font-size:13px;">🔊 音あり</button>
+    </div>
 
     <div id="bandPreview"></div>
 
@@ -443,7 +446,16 @@ const drum = document.getElementById('drum');
 const resultBox = document.getElementById('resultBox');
 let audioCtx;
 
+let soundOn = true;
+const sndBtn = document.getElementById('sndBtn');
+sndBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  soundOn = !soundOn;
+  sndBtn.textContent = soundOn ? '🔊 音あり' : '🔇 音なし';
+});
 function beep(freq, t0, dur, type='square', gain=.12){
+  if(!soundOn) return;
+  gain *= 1.6; // 全体音量を底上げ
   const o=audioCtx.createOscillator(), g=audioCtx.createGain();
   o.type=type; o.frequency.value=freq;
   g.gain.setValueAtTime(gain, audioCtx.currentTime+t0);
@@ -471,6 +483,7 @@ function fanfare(rank){
 
 function showResult(setsu, sub, yen, band, role, gougi){
   audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume(); // 自動再生制限対策(iOS Safari等)
   overlay.classList.add('show');
   resultBox.style.display='none';
   drum.style.display='block';
