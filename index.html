@@ -6,18 +6,11 @@
 <title>⚡ 専決区分ジャッジ 〜 一宮市支出負担行為 〜 ⚡</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  :root{
-    --gold:#ffd700;
-  }
   html,body{ height:100%; }
   body{
     font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
-    background:#0b0b1a;
-    color:#fff;
-    overflow-x:hidden;
-    min-height:100vh;
+    background:#0b0b1a; color:#fff; overflow-x:hidden; min-height:100vh;
   }
-  /* animated bg */
   .bg{
     position:fixed; inset:0; z-index:0;
     background:
@@ -29,7 +22,6 @@
   @keyframes bgshift{ from{filter:hue-rotate(0deg);} to{filter:hue-rotate(60deg);} }
 
   .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding:24px 16px 80px; }
-
   h1{
     text-align:center; font-size:clamp(24px,5vw,40px); margin:12px 0 4px;
     background:linear-gradient(90deg,#ffd700,#ff6ec7,#00e5ff,#ffd700);
@@ -42,14 +34,13 @@
   .sub{ text-align:center; color:#9aa; font-size:13px; margin-bottom:24px; }
 
   .panel{
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.15);
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15);
     border-radius:16px; padding:20px; backdrop-filter:blur(8px);
     box-shadow:0 8px 32px rgba(0,0,0,.4);
   }
   label{ display:block; font-weight:bold; margin:14px 0 6px; color:#ffd700; letter-spacing:.05em; }
   select,input[type=text]{
-    width:100%; padding:14px 16px; font-size:18px; border-radius:10px;
+    width:100%; padding:14px 16px; font-size:17px; border-radius:10px;
     border:2px solid rgba(255,255,255,.25); background:#151530; color:#fff;
     outline:none; transition:.2s;
   }
@@ -57,6 +48,7 @@
   .unit-row{ display:flex; align-items:center; gap:10px; }
   .unit-row input{ flex:1; text-align:right; font-size:24px; font-weight:bold; letter-spacing:.05em; }
   .unit{ font-size:20px; font-weight:bold; color:#ffd700; white-space:nowrap; }
+  .hint{ font-size:12px; color:#9ab; margin-top:6px; line-height:1.6; }
   .quick{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
   .quick button{
     padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.3);
@@ -102,7 +94,7 @@
     text-shadow:0 2px 8px rgba(0,0,0,.6); }
   #whoTitle{ font-size:clamp(16px,3vw,24px); letter-spacing:.4em; color:#fff; opacity:.85; margin-bottom:4px; }
   #who{
-    font-size:clamp(64px,16vw,170px); font-weight:900; line-height:1.1;
+    font-size:clamp(56px,15vw,160px); font-weight:900; line-height:1.1;
     animation:slam .55s cubic-bezier(.2,2.2,.4,1) both;
     text-shadow:0 0 30px currentColor, 0 6px 0 rgba(0,0,0,.35);
   }
@@ -130,7 +122,7 @@
     margin-top:20px; font-size:clamp(14px,2.6vw,19px); color:#fff;
     background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.3);
     border-radius:12px; padding:12px 18px; display:inline-block; text-align:left;
-    animation:fadeUp .5s .9s both;
+    animation:fadeUp .5s .9s both; max-width:640px;
   }
   #basis{
     margin-top:12px; font-size:12.5px; color:#cdd; opacity:.9;
@@ -163,13 +155,17 @@
 <div class="bg"></div>
 <div class="wrap">
   <h1>⚡ 専決区分ジャッジ ⚡</h1>
-  <div class="sub">一宮市「予算の編成及び執行に関する規則」別表第1(支出負担行為専決区分)準拠 — 節と金額を入れて運命の審判を受けよ</div>
+  <div class="sub">一宮市「予算の編成及び執行に関する規則」別表第1(支出負担行為専決区分・全27節/全区分収録) — 節と区分と金額を入れて運命の審判を受けよ</div>
 
   <div class="panel">
-    <label>節・区分をえらぶ</label>
-    <select id="cat"></select>
+    <label>① 節をえらぶ</label>
+    <select id="setsu"></select>
 
-    <label>金額を入力(円)</label>
+    <label>② 区分をえらぶ</label>
+    <select id="kubun"></select>
+    <div class="hint" id="kubunHint"></div>
+
+    <label id="amtLabel">③ 金額を入力(円)</label>
     <div class="unit-row">
       <input type="text" id="amt" inputmode="numeric" placeholder="例: 1,200,000" autocomplete="off">
       <span class="unit">円</span>
@@ -192,9 +188,10 @@
     <div id="bandPreview"></div>
 
     <div class="note">
-      ※ 一宮市「予算の編成及び執行に関する規則」別表第1(第28条・第29条・第31条関係)に基づく支出負担行為の専決区分です。金額の境界は「以上/未満」(単位:万円)。<br>
+      ※ 一宮市「予算の編成及び執行に関する規則」別表第1(第28条・第29条・第31条関係)に基づく<b>支出負担行為</b>の専決区分です。金額の境界は「以上/未満」(規則の単位は万円)。<br>
       ※ 合議先「財務部」は、副市長専決→財務部長、部長等専決→財務部次長、部等の次長等専決→財政課長の合議(備考3)。<br>
-      ※ 継続費・繰越等の特例(備考4以降)、変更契約(備考9)などの個別事情は原文をご確認ください。
+      ※ 単価契約は契約時に予定数量×単価の予定総額で決裁区分を判定(備考2)。変更契約の専決区分・合議先の金額は変更前後の契約金額の高い方(備考9)。「変更契約」区分では<b>変更増減額</b>を入力してください。<br>
+      ※ 工事の<b>施行伺・入札</b>は別制度(一宮市専決規程 別表第2)です。例: 工事設計兼施行伺は設計金額1億5,000万円未満まで副市長専決、それ以上は市長決裁。本ツールは支出負担行為(契約時の決裁)のみを判定します。
     </div>
   </div>
 </div>
@@ -219,11 +216,13 @@
 
 <script>
 /* =========================================================
-   専決区分データ
+   専決区分データ(全27節・全区分)
    出典: 一宮市 予算の編成及び執行に関する規則 別表第1
         (単位: 万円 / 「以上」「未満」)
    role: 専任=専任課長等, 課=課長等, 次=部等の次長等,
          部=部長等, 副=副市長, 市=市長(専決欄に定めなし=市長決裁)
+   who: 専決者が特定の課長に指定されている場合の注記
+   amt: "change" = 変更増減額で判定する区分
 ========================================================= */
 const ROLES = {
   "専任": { name:"専任課長等", color:"#7CFC98", bg:"radial-gradient(circle at 50% 40%, #0b3d1e, #04140a)", rank:1 },
@@ -235,48 +234,144 @@ const ROLES = {
 };
 
 // bands: 金額の小さい順。min以上 max未満 (万円)。max:null = 上限なし
-const CATS = [
-  { id:"1", name:"1 報酬(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"なし(会計年度任用職員報酬は人事課長合議)" },
-  { id:"2", name:"2 給料", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
-  { id:"3", name:"3 職員手当等(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
-  { id:"4", name:"4 共済費(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
-  { id:"5", name:"5 災害補償費(下記以外)", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
-  { id:"6", name:"6 恩給及び退職年金", bands:[{min:0,max:null,role:"課"}], gougi:"人事課長" },
-  { id:"7", name:"7 報償費(下記以外)", bands:[{min:0,max:50,role:"課"},{min:50,max:100,role:"次"},{min:100,max:null,role:"部"}], gougi:"100万円以上は財政課長" },
-  { id:"8a", name:"8 旅費(宿泊を伴う旅行)", bands:[{min:0,max:10,role:"課"},{min:10,max:15,role:"次"},{min:15,max:null,role:"部"}], gougi:"財政課長" },
-  { id:"8b", name:"8 旅費(日帰り旅行)", bands:[{min:0,max:1,role:"専任"},{min:1,max:null,role:"課"}], gougi:"なし" },
-  { id:"9", name:"9 交際費", bands:[{min:0,max:10,role:"副"},{min:10,max:null,role:"市"}], gougi:"財政課長(議会のものは全額議会局長専決・備考13)" },
-  { id:"10a", name:"10 需用費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"500万円以上は財政課長/消防を除く自動車関係は資産経営課長(5万円未満は資産経営課専任課長)" },
-  { id:"10b", name:"10 需用費(光熱水費)", bands:[{min:0,max:5,role:"専任"},{min:5,max:null,role:"課"}], gougi:"なし(公共料金システム分は全額会計課長専決)" },
-  { id:"10c", name:"10 需用費(飲食料費)", bands:[{min:0,max:10,role:"課"},{min:10,max:30,role:"次"},{min:30,max:50,role:"部"},{min:50,max:null,role:"副"}], gougi:"接待用は財政課長(接待用は施行伺により副市長決裁+財務部長・財務部次長・財政課長合議 — 備考1)" },
-  { id:"10d", name:"10 需用費(物品を除く修繕料)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"130万円超は技術関係担当課長(緊急応急工事を除く)+財務部", fzb:true },
-  { id:"11", name:"11 役務費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"500万円以上は財政課長/火災・自動車関係保険料は資産経営課長(5万円未満は資産経営課専任課長)" },
-  { id:"12a", name:"12 委託料(下記以外)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
-  { id:"12b", name:"12 委託料(測量・調査・設計・監理等)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"50万円超は技術関係担当課長+財務部", fzb:true },
-  { id:"13", name:"13 使用料及び賃借料(下記以外)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/不動産関係は資産経営課長", fzb:true },
-  { id:"14", name:"14 工事請負費(下記以外)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"技術関係担当課長+財務部", fzb:true },
-  { id:"15", name:"15 原材料費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:300,role:"課"},{min:300,max:null,role:"次"}], gougi:"なし" },
-  { id:"16a", name:"16 公有財産購入費(下記以外)", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/100万円以上は財務部", fzb:true },
-  { id:"16b", name:"16 公有財産購入費(公共事業用地)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/道水路用地を除く用地取得は資産経営課長", fzb:true },
-  { id:"17", name:"17 備品購入費", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/消防を除く自動車関係は資産経営課長", fzb:true },
-  { id:"18", name:"18 負担金、補助及び交付金(下記以外)", bands:[{min:0,max:50,role:"課"},{min:50,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
-  { id:"19", name:"19 扶助費", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
-  { id:"20", name:"20 貸付金", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/債権は資産経営課長" },
-  { id:"21a", name:"21 補償金・補填金(下記以外)", bands:[{min:0,max:1500,role:"副"},{min:1500,max:null,role:"市"}], gougi:"財政課長" },
-  { id:"21b", name:"21 公共事業の施行に伴う移転補償", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"財務部", fzb:true },
-  { id:"21c", name:"21 賠償金", bands:[{min:0,max:null,role:"副"}], gougi:"財政課長/道水路関係を除く車両・不動産関係は資産経営課長" },
-  { id:"22", name:"22 償還金、利子及び割引料(下記以外)", bands:[{min:0,max:10,role:"次"},{min:10,max:null,role:"部"}], gougi:"10万円以上は財政課長" },
-  { id:"23", name:"23 投資及び出資金", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/公有財産は資産経営課長" },
-  { id:"24", name:"24 積立金", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/10万円以上は財政課長" },
-  { id:"25", name:"25 寄附金", bands:[{min:0,max:null,role:"市"}], gougi:"財政課長" },
-  { id:"26", name:"26 公課費", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
-  { id:"27", name:"27 繰出金", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長" },
+const SETSU = [
+{ name:"1 報酬", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+  { name:"会計年度任用職員報酬", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+]},
+{ name:"2 給料", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+]},
+{ name:"3 職員手当等", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+  { name:"議員期末手当", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"4 共済費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+  { name:"消防団員等公務災害補償・議員共済費", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"5 災害補償費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+  { name:"消防団員等公務災害補償費", bands:[{min:0,max:null,role:"課"}], who:"消防本部総務課長", gougi:"なし" },
+]},
+{ name:"6 恩給及び退職年金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+]},
+{ name:"7 報償費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:50,role:"課"},{min:50,max:100,role:"次"},{min:100,max:null,role:"部"}], gougi:"100万円以上は財政課長" },
+  { name:"災害見舞金", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"8 旅費", subs:[
+  { name:"宿泊を伴う旅行", bands:[{min:0,max:10,role:"課"},{min:10,max:15,role:"次"},{min:15,max:null,role:"部"}], gougi:"財政課長" },
+  { name:"日帰り旅行", bands:[{min:0,max:1,role:"専任"},{min:1,max:null,role:"課"}], gougi:"なし" },
+  { name:"転居費、家族移転費", bands:[{min:0,max:10,role:"課"},{min:10,max:15,role:"次"},{min:15,max:null,role:"部"}], gougi:"人事課長・財政課長" },
+  { name:"会計年度任用職員通勤費", bands:[{min:0,max:null,role:"課"}], who:"人事課長", gougi:"なし" },
+]},
+{ name:"9 交際費", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:10,role:"副"},{min:10,max:null,role:"市"}], gougi:"財政課長", note:"議会の交際費は全額議会局長専決(備考13)" },
+]},
+{ name:"10 需用費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"500万円以上は財政課長/消防を除く自動車関係は資産経営課長(5万円未満は資産経営課専任課長)" },
+  { name:"下記以外の単価契約によるもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"消防を除く自動車関係は資産経営課長(5万円未満は資産経営課専任課長)", note:"予定数量×単価の予定総額で判定(備考2)" },
+  { name:"光熱水費(下記以外)", bands:[{min:0,max:5,role:"専任"},{min:5,max:null,role:"課"}], gougi:"なし" },
+  { name:"公共料金システムにより処理される光熱水費", bands:[{min:0,max:null,role:"課"}], who:"会計課長", gougi:"なし" },
+  { name:"飲食料費", bands:[{min:0,max:10,role:"課"},{min:10,max:30,role:"次"},{min:30,max:50,role:"部"},{min:50,max:null,role:"副"}], gougi:"接待用は財政課長", note:"接待用は施行伺により副市長決裁+財務部長・財務部次長・財政課長合議(備考1)" },
+  { name:"修繕料(物品を除く)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"130万円超は技術関係担当課長(緊急応急工事を除く)+財務部", fzb:true },
+  { name:"修繕料(物品を除く)の変更契約(増減額10%未満・軽微)", amt:"change", bands:[{min:0,max:100,role:"課"},{min:100,max:300,role:"次"},{min:300,max:500,role:"部"},{min:500,max:null,role:"副"}], gougi:"130万円超は技術関係担当課長+財務部", fzb:true, note:"金額欄には変更増減額(当初契約額との差額)を入力。合議先の金額判定は変更前後の契約金額の高い方(備考9)" },
+]},
+{ name:"11 役務費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"500万円以上は財政課長/火災・自動車関係保険料は資産経営課長(5万円未満は資産経営課専任課長)" },
+  { name:"下記以外の単価契約によるもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"なし", note:"予定数量×単価の予定総額で判定(備考2)" },
+  { name:"医療費審査支払等手数料・下記以外の通信運搬費", bands:[{min:0,max:null,role:"課"}], gougi:"タクシー料は資産経営課長" },
+  { name:"公共料金システムにより処理される通信運搬費", bands:[{min:0,max:null,role:"課"}], who:"会計課長", gougi:"なし" },
+]},
+{ name:"12 委託料", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { name:"測量・調査・設計・監理等業務委託料(下記以外)", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"50万円超は技術関係担当課長+財務部", fzb:true },
+  { name:"測量・調査・設計・監理等の変更契約(増減額10%未満・軽微)", amt:"change", bands:[{min:0,max:100,role:"課"},{min:100,max:300,role:"次"},{min:300,max:500,role:"部"},{min:500,max:null,role:"副"}], gougi:"50万円超は技術関係担当課長+財務部", fzb:true, note:"金額欄には変更増減額を入力。合議先の金額判定は変更前後の契約金額の高い方(備考9)" },
+  { name:"単価契約によるもの", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"なし", note:"予定数量×単価の予定総額で判定(備考2)" },
+]},
+{ name:"13 使用料及び賃借料", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/不動産関係は資産経営課長", fzb:true },
+  { name:"下記以外の単価契約によるもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"なし", note:"予定数量×単価の予定総額で判定(備考2)" },
+  { name:"公共料金システムにより処理されるテレビ受信料", bands:[{min:0,max:null,role:"課"}], who:"会計課長", gougi:"なし" },
+]},
+{ name:"14 工事請負費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:1000,role:"課"},{min:1000,max:3000,role:"次"},{min:3000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"技術関係担当課長+財務部", fzb:true, note:"施行伺は別制度(専決規程別表第2: 設計金額1億5,000万円未満まで副市長、それ以上は市長)" },
+  { name:"変更契約(増減額10%未満・軽微)", amt:"change", bands:[{min:0,max:100,role:"課"},{min:100,max:300,role:"次"},{min:300,max:500,role:"部"},{min:500,max:null,role:"副"}], gougi:"技術関係担当課長+財務部", fzb:true, note:"金額欄には変更増減額(当初契約額との差額・備考11)を入力。合議先の金額判定は変更前後の契約金額の高い方(備考9)" },
+]},
+{ name:"15 原材料費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:300,role:"課"},{min:300,max:null,role:"次"}], gougi:"なし" },
+  { name:"単価契約によるもの", bands:[{min:0,max:5,role:"専任"},{min:5,max:500,role:"課"},{min:500,max:null,role:"次"}], gougi:"なし", note:"予定数量×単価の予定総額で判定(備考2)" },
+]},
+{ name:"16 公有財産購入費", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/100万円以上は財務部", fzb:true },
+  { name:"公共事業用地", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/道水路用地を除く用地取得は資産経営課長", fzb:true },
+]},
+{ name:"17 備品購入費", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部/消防を除く自動車関係は資産経営課長", fzb:true },
+]},
+{ name:"18 負担金、補助及び交付金", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:50,role:"課"},{min:50,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { name:"奨学金・国保給付費・介護保険給付費・後期高齢者医療関係負担金等", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"19 扶助費", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"20 貸付金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/債権は資産経営課長" },
+]},
+{ name:"21 補償、補填及び賠償金", subs:[
+  { name:"補償金・補填金(下記以外)", bands:[{min:0,max:1500,role:"副"},{min:1500,max:null,role:"市"}], gougi:"財政課長" },
+  { name:"公共事業の施行に伴う移転補償(区画整理事業を含む)", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:5000,role:"部"},{min:5000,max:null,role:"副"}], gougi:"財務部", fzb:true },
+  { name:"尾張一宮駅前ビル駐車場料金減免分補償金", bands:[{min:0,max:500,role:"課"},{min:500,max:1000,role:"次"},{min:1000,max:null,role:"部"}], gougi:"なし" },
+  { name:"賠償金", bands:[{min:0,max:null,role:"副"}], gougi:"財政課長/道水路関係を除く車両・不動産関係は資産経営課長" },
+]},
+{ name:"22 償還金、利子及び割引料", subs:[
+  { name:"下記以外のもの", bands:[{min:0,max:10,role:"次"},{min:10,max:null,role:"部"}], gougi:"10万円以上は財政課長" },
+  { name:"税還付金・還付加算金", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"23 投資及び出資金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長/公有財産は資産経営課長" },
+]},
+{ name:"24 積立金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"資産経営課長/10万円以上は財政課長" },
+]},
+{ name:"25 寄附金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:null,role:"市"}], gougi:"財政課長" },
+]},
+{ name:"26 公課費", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:null,role:"課"}], gougi:"なし" },
+]},
+{ name:"27 繰出金", subs:[
+  { name:"(区分なし)", bands:[{min:0,max:1000,role:"次"},{min:1000,max:1500,role:"部"},{min:1500,max:null,role:"副"}], gougi:"財政課長" },
+]},
 ];
 
 /* ------- UI setup ------- */
-const catSel = document.getElementById('cat');
-CATS.forEach((c,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=c.name; catSel.appendChild(o); });
-catSel.value = CATS.findIndex(c=>c.id==="14"); // 工事請負費を初期表示
+const setsuSel = document.getElementById('setsu');
+const kubunSel = document.getElementById('kubun');
+SETSU.forEach((s,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=s.name; setsuSel.appendChild(o); });
+
+function currentSub(){ return SETSU[setsuSel.value].subs[kubunSel.value]; }
+function fillKubun(){
+  kubunSel.innerHTML='';
+  SETSU[setsuSel.value].subs.forEach((sub,i)=>{
+    const o=document.createElement('option'); o.value=i; o.textContent=sub.name; kubunSel.appendChild(o);
+  });
+  onKubun();
+}
+function onKubun(){
+  const sub = currentSub();
+  document.getElementById('kubunHint').textContent = sub.note || '';
+  document.getElementById('amtLabel').textContent =
+    sub.amt==='change' ? '③ 変更増減額を入力(円)' : '③ 金額を入力(円)';
+  renderPreview();
+}
+setsuSel.addEventListener('change', fillKubun);
+kubunSel.addEventListener('change', onKubun);
+setsuSel.value = SETSU.findIndex(s=>s.name.startsWith("14")); // 工事請負費を初期表示
+fillKubun();
 
 const amt = document.getElementById('amt');
 amt.addEventListener('input', ()=> {
@@ -298,29 +393,32 @@ function bandLabel(b){
   return fmtMan(b.min)+"以上 "+fmtMan(b.max)+"未満";
 }
 function renderPreview(){
-  const c = CATS[catSel.value];
-  let h = '<table class="bands"><tr><th>金額(万円)</th><th>専決者</th></tr>';
-  c.bands.forEach(b=>{ h+=`<tr><td>${bandLabel(b)}</td><td style="color:${ROLES[b.role].color};font-weight:bold;">${ROLES[b.role].name}</td></tr>`; });
-  h += `</table><div class="note" style="margin-top:6px;">合議先: ${c.gougi}</div>`;
+  const sub = currentSub();
+  const col = sub.amt==='change' ? '変更増減額(万円)' : '金額(万円)';
+  let h = `<table class="bands"><tr><th>${col}</th><th>専決者</th></tr>`;
+  sub.bands.forEach(b=>{
+    const extra = (b.role==='課' && sub.who) ? `(${sub.who})` : '';
+    h+=`<tr><td>${bandLabel(b)}</td><td style="color:${ROLES[b.role].color};font-weight:bold;">${ROLES[b.role].name}${extra}</td></tr>`;
+  });
+  h += `</table><div class="note" style="margin-top:6px;">合議先: ${sub.gougi}${sub.note ? '<br>'+sub.note : ''}</div>`;
   document.getElementById('bandPreview').innerHTML = h;
 }
-catSel.addEventListener('change', renderPreview);
-renderPreview();
 
 /* ------- judge ------- */
 function judge(){
   const yen = Number(amt.value.replace(/[^0-9]/g,''));
   if(!yen){ amt.focus(); amt.style.borderColor='#ff5252'; setTimeout(()=>amt.style.borderColor='',600); return; }
   const man = yen/10000;
-  const c = CATS[catSel.value];
-  const band = c.bands.find(b => man>=b.min && (b.max===null || man<b.max));
+  const setsu = SETSU[setsuSel.value];
+  const sub = currentSub();
+  const band = sub.bands.find(b => man>=b.min && (b.max===null || man<b.max));
   const role = ROLES[band.role];
-  let gougi = c.gougi;
-  if(c.fzb && /財務部/.test(gougi)){
+  let gougi = sub.gougi;
+  if(sub.fzb && /財務部/.test(gougi)){
     const map = { "副":"財務部長", "部":"財務部次長", "次":"財政課長" };
-    if(map[band.role]) gougi += `\n→ 備考3により今回の合議先は「${map[band.role]}」`;
+    if(map[band.role]) gougi += `\n→ 備考3により今回の「財務部」合議先は「${map[band.role]}」`;
   }
-  showResult(c, yen, band, role, gougi);
+  showResult(setsu, sub, yen, band, role, gougi);
 }
 document.getElementById('judgeBtn').addEventListener('click', judge);
 amt.addEventListener('keydown', e=>{ if(e.key==='Enter') judge(); });
@@ -349,7 +447,7 @@ function fanfare(rank){
   if(rank>=5){ [1568,1760,2093].forEach((f,i)=>beep(f,.6+i*.1,.9,'sawtooth',.07)); }
 }
 
-function showResult(c, yen, band, role, gougi){
+function showResult(setsu, sub, yen, band, role, gougi){
   audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
   overlay.classList.add('show');
   resultBox.style.display='none';
@@ -359,7 +457,6 @@ function showResult(c, yen, band, role, gougi){
   drumroll(suspense/1000);
 
   setTimeout(()=>{
-    // flash + shake
     const f=document.createElement('div'); f.className='flash'; document.body.appendChild(f);
     setTimeout(()=>f.remove(),500);
     document.body.classList.add('shake');
@@ -368,10 +465,11 @@ function showResult(c, yen, band, role, gougi){
 
     drum.style.display='none';
     document.getElementById('overlayBg').style.background = role.bg;
-    document.getElementById('catLine').textContent = c.name;
-    document.getElementById('amtLine').textContent = yen.toLocaleString('ja-JP')+" 円("+(yen/10000).toLocaleString('ja-JP')+"万円)";
+    document.getElementById('catLine').textContent = setsu.name + " / " + sub.name;
+    const amtWord = sub.amt==='change' ? "変更増減額 " : "";
+    document.getElementById('amtLine').textContent = amtWord + yen.toLocaleString('ja-JP')+" 円("+(yen/10000).toLocaleString('ja-JP')+"万円)";
     const who = document.getElementById('who');
-    who.textContent = role.name;
+    who.textContent = role.name + ((band.role==='課' && sub.who) ? "("+sub.who+")" : "");
     who.style.color = role.color;
     who.className = role.rank>=6 ? 'rainbowWho' : 'megaGlow';
     const stamp = document.getElementById('stamp');
@@ -380,11 +478,11 @@ function showResult(c, yen, band, role, gougi){
     document.getElementById('gougi').innerHTML =
       "🤝 <b>合議先:</b> " + gougi.replace(/\n/g,'<br>');
     document.getElementById('basis').innerHTML =
-      "📜 <b>根拠:</b> 一宮市 予算の編成及び執行に関する規則 別表第1「"+c.name+"」該当区分: <b>"+bandLabel(band)+"</b> → "+role.name+
-      (band.role==="市" ? "(別表第1に専決の定めがない区分のため市長決裁)" : "");
+      "📜 <b>根拠:</b> 一宮市 予算の編成及び執行に関する規則 別表第1「"+setsu.name+"」/「"+sub.name+"」該当区分: <b>"+bandLabel(band)+"</b> → "+role.name+
+      (band.role==="市" ? "(別表第1に専決の定めがない区分のため市長決裁)" : "") +
+      (sub.note ? "<br>⚠ "+sub.note : "");
     resultBox.style.display='block';
 
-    // 演出リスタート
     who.style.animation='none'; void who.offsetWidth; who.style.animation='';
     launchConfetti(role);
   }, suspense);
@@ -414,7 +512,6 @@ function launchConfetti(role){
       shape: Math.random()<.25 ? 'star':'rect'
     });
   }
-  // side cannons for top ranks
   if(role.rank>=5){
     for(let i=0;i<120;i++){
       const left = i%2===0;
