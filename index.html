@@ -671,6 +671,8 @@ function fanfare(rank){
 function showResult(setsu, sub, yen, band, role, gougi){
   audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state === 'suspended') audioCtx.resume(); // 自動再生制限対策(iOS Safari等)
+  // 初回判定時に描画バッファがデフォルト300x150のままだと爆発座標がズレるため、先にフルサイズ化
+  if(cv.width !== innerWidth || cv.height !== innerHeight){ cv.width = innerWidth; cv.height = innerHeight; }
   overlay.classList.add('show');
   resultBox.style.display='none';
   drum.style.display='block';
@@ -783,7 +785,7 @@ overlay.addEventListener('click', ()=>{
 const cv = document.getElementById('confetti'), ctx = cv.getContext('2d');
 let parts=[], confettiRun=false, raf;
 function launchConfetti(role){
-  cv.width=innerWidth; cv.height=innerHeight;
+  if(cv.width !== innerWidth || cv.height !== innerHeight){ cv.width=innerWidth; cv.height=innerHeight; }
   parts = parts.filter(p => p.life !== undefined); // 爆発の破片は残し、古い紙吹雪だけ捨てる
   // 紙吹雪の量・星の割合・大砲はランクの二乗で段階的に豪華に
   const rank = role.rank;
@@ -829,7 +831,6 @@ function launchConfetti(role){
 let rings=[], fires=[], smokes=[];
 /* 本格爆発: 閃光→火球(コア+舌状の炎)→黒煙→破片→衝撃波 */
 function explode(rank){
-  if(!cv.width){ cv.width=innerWidth; cv.height=innerHeight; }
   const cx=cv.width/2, cy=cv.height*.42;
   const scale = .7 + rank*.22;
 
