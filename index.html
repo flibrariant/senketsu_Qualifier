@@ -463,10 +463,45 @@ function beep(freq, t0, dur, type='square', gain=.12){
   o.connect(g); g.connect(audioCtx.destination);
   o.start(audioCtx.currentTime+t0); o.stop(audioCtx.currentTime+t0+dur+.05);
 }
+let noiseBuf;
+function getNoiseBuf(){
+  if(noiseBuf) return noiseBuf;
+  noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate*0.2, audioCtx.sampleRate);
+  const d = noiseBuf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return noiseBuf;
+}
+// スネア風の一打(ノイズ+胴鳴り)
+function snare(t0, gain){
+  if(!soundOn) return;
+  const t = audioCtx.currentTime + t0;
+  const src = audioCtx.createBufferSource(); src.buffer = getNoiseBuf();
+  const bp = audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1800; bp.Q.value=.8;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(gain, t);
+  g.gain.exponentialRampToValueAtTime(.001, t+.08);
+  src.connect(bp); bp.connect(g); g.connect(audioCtx.destination);
+  src.start(t); src.stop(t+.09);
+  const o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(180,t);
+  o.frequency.exponentialRampToValueAtTime(90, t+.06);
+  const og = audioCtx.createGain();
+  og.gain.setValueAtTime(gain*.7, t);
+  og.gain.exponentialRampToValueAtTime(.001, t+.07);
+  o.connect(og); og.connect(audioCtx.destination);
+  o.start(t); o.stop(t+.08);
+}
+// ドラムロール: 序盤から刻み、終盤に向けて加速+クレッシェンド
 function drumroll(sec, rank){
-  const step = .1 - rank*.008;           // 上位ほどロールが細かく激しく
-  const gain = .06 + rank*.012;
-  for(let t=0;t<sec;t+=step) beep(80+Math.random()*40, t, .05, 'triangle', gain);
+  const baseGain = .25 + rank*.06;
+  let t = 0;
+  while(t < sec){
+    const p = t/sec;                            // 進行度 0→1
+    const interval = .09 - p*.055;              // 加速: 90ms → 35ms
+    const gain = baseGain * (.45 + p*.85);      // クレッシェンド
+    snare(t, gain);
+    t += interval;
+  }
+  snare(sec, baseGain*1.6);                     // 最後にドンと一打
 }
 /* 職位ランクでファンファーレが段階的に豪華になる */
 function fanfare(rank){
